@@ -1,0 +1,22 @@
+{
+  "_self_": {
+    "valueHash": "8edf9fd34b93de4b5595e30a2135d7e8",
+    "isUserSet": false,
+    "isActiveInStructure": true
+  },
+  "Implementation/": {
+    "valueHash": "38164c8be942882c3e6c233dfc8087ab",
+    "isUserSet": false,
+    "isActiveInStructure": true
+  },
+  "Catalogue.md": {
+    "valueHash": "767fa455bb6826f4b550c21a6bca7182",
+    "isUserSet": false,
+    "isActiveInStructure": true
+  },
+  "Design/": {
+    "valueHash": "b08890a6ef3b65218573ed90770b08fd",
+    "isUserSet": false,
+    "isActiveInStructure": true
+  }
+}

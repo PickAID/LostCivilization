@@ -1,0 +1,5 @@
+{
+    "loadFailed": "Failed to load 3D model",
+    "loadHint": "Please check the model URL and format (.glb/.gltf).",
+    "loading": "Loading 3D model..."
+}

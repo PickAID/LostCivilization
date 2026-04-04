@@ -1,0 +1,197 @@
+/**
+ * Tag Color Configuration
+ * Centralized color management for tag badges
+ */
+
+:root {
+    /* Version Tags */
+    --tag-color-minecraft: #62c462;
+    --tag-color-neoforge: #ff6b35;
+    --tag-color-forge: #ff6b35;
+    --tag-color-fabric: #dba213;
+
+    /* Content Type Tags */
+    --tag-color-tutorial: #3b82f6;
+    --tag-color-api: #8b5cf6;
+    --tag-color-guide: #10b981;
+    --tag-color-reference: #6366f1;
+
+    /* System Tags */
+    --tag-color-kubejs: #5518fe;
+    --tag-color-entity: #ef4444;
+    --tag-color-events: #ec4899;
+    --tag-color-methods: #06b6d4;
+    --tag-color-ai: #8b5cf6;
+    --tag-color-livingentity: #dc2626;
+
+    /* Data Tags */
+    --tag-color-nbt: #84cc16;
+    --tag-color-config: #f97316;
+    --tag-color-data-structure: #14b8a6;
+
+    /* Fallback Colors for Hash-based Assignment */
+    --tag-color-fallback-0: #22c55e; /* green */
+    --tag-color-fallback-1: #eab308; /* yellow */
+    --tag-color-fallback-2: #6b7280; /* gray */
+    --tag-color-fallback-3: #dc2626; /* red-600 */
+    --tag-color-fallback-4: #2563eb; /* blue-600 */
+    --tag-color-fallback-5: #059669; /* emerald-600 */
+    --tag-color-fallback-6: #7c3aed; /* violet-600 */
+    --tag-color-fallback-7: #f43f5e; /* rose */
+    --tag-color-fallback-8: #a855f7; /* purple */
+    --tag-color-fallback-9: #14b8a6; /* teal */
+}
+
+/* Tag Badge Base Styles */
+.tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.44rem 0.82rem;
+    font-size: 0.77rem;
+    font-weight: 650;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    border-radius: 8px;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--tag-color) 18%, var(--vp-c-bg-soft)) 0%,
+            color-mix(in srgb, var(--tag-color) 12%, var(--vp-c-bg-elv)) 100%
+        );
+    color: var(--tag-color);
+    border: 1px solid color-mix(in srgb, var(--tag-color) 28%, var(--vp-c-border));
+    white-space: nowrap;
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background-color 0.18s ease,
+        box-shadow 0.18s ease,
+        color 0.18s ease;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
+}
+
+.tag-badge--clickable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.tag-badge--clickable:hover,
+.tag-badge--clickable:focus-visible {
+    border-color: color-mix(in srgb, var(--tag-color) 45%, var(--vp-c-border));
+    background: var(--tag-color);
+    color: white;
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, white 24%, transparent),
+        0 6px 16px color-mix(in srgb, var(--tag-color) 14%, transparent);
+    outline: none;
+}
+
+.tag-badge--clickable:active {
+    background: color-mix(in srgb, var(--tag-color) 86%, black);
+    color: white;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+}
+
+.tag-badge__text {
+    user-select: none;
+}
+
+.tag-badge__count {
+    margin-left: 0.1rem;
+    padding-left: 0.45rem;
+    border-left: 1px solid color-mix(in srgb, var(--tag-color) 20%, transparent);
+    font-size: 0.68rem;
+    font-weight: 600;
+    min-width: 1rem;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0.72;
+}
+
+.tag-badge--clickable:hover .tag-badge__count,
+.tag-badge--clickable:focus-visible .tag-badge__count,
+.tag-badge--clickable:active .tag-badge__count {
+    border-left-color: color-mix(in srgb, white 26%, transparent);
+    opacity: 0.92;
+}
+
+/* Dark mode styles */
+.dark .tag-badge {
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--tag-color) 20%, var(--vp-c-bg-soft)) 0%,
+            color-mix(in srgb, var(--tag-color) 12%, var(--vp-c-bg-elv)) 100%
+        );
+    border-color: color-mix(in srgb, var(--tag-color) 30%, var(--vp-c-border));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+}
+
+/* Specific Tag Color Classes */
+.tag-badge[data-tag="minecraft"],
+.tag-badge[data-tag*="minecraft"] {
+    --tag-color: var(--tag-color-minecraft);
+}
+
+.tag-badge[data-tag="neoforge"],
+.tag-badge[data-tag*="neoforge"] {
+    --tag-color: var(--tag-color-neoforge);
+}
+
+.tag-badge[data-tag="forge"] {
+    --tag-color: var(--tag-color-forge);
+}
+
+.tag-badge[data-tag="fabric"] {
+    --tag-color: var(--tag-color-fabric);
+}
+
+.tag-badge[data-tag="tutorial"],
+.tag-badge[data-tag*="tutorial"] {
+    --tag-color: var(--tag-color-tutorial);
+}
+
+.tag-badge[data-tag="api"] {
+    --tag-color: var(--tag-color-api);
+}
+
+.tag-badge[data-tag="guide"] {
+    --tag-color: var(--tag-color-guide);
+}
+
+.tag-badge[data-tag="kubejs"] {
+    --tag-color: var(--tag-color-kubejs);
+}
+
+.tag-badge[data-tag="entity"] {
+    --tag-color: var(--tag-color-entity);
+}
+
+.tag-badge[data-tag="events"] {
+    --tag-color: var(--tag-color-events);
+}
+
+.tag-badge[data-tag="methods"] {
+    --tag-color: var(--tag-color-methods);
+}
+
+.tag-badge[data-tag="ai"] {
+    --tag-color: var(--tag-color-ai);
+}
+
+.tag-badge[data-tag="livingentity"] {
+    --tag-color: var(--tag-color-livingentity);
+}
+
+.tag-badge[data-tag="nbt"] {
+    --tag-color: var(--tag-color-nbt);
+}
+
+.tag-badge[data-tag="config"] {
+    --tag-color: var(--tag-color-config);
+}
+
+.tag-badge[data-tag="数据结构"] {
+    --tag-color: var(--tag-color-data-structure);
+}

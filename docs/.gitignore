@@ -1,0 +1,16 @@
+node_modules/
+.cache/
+.vitepress/cache/
+.vitepress/dist/
+.vitepress/.temp/
+.vitepress/dev.json
+.vitepress/config.mts.timestamp*
+typefiles/
+route.bash
+output.html
+notes/
+plans/
+specs/
+.vscode/settings.json
+*.DS_Store
+*.temp

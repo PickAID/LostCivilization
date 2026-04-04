@@ -1,0 +1,17 @@
+filename = 'kube-utils-20.1.1.jar'
+name = 'Kube Utils'
+side = ''
+x-prismlauncher-loaders = [ 'forge' ]
+x-prismlauncher-mc-versions = [ '1.20.1', '1.20.1' ]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = '20.1.1'
+
+[download]
+hash = 'cbe0072209997231814a3c9df579eedf892573a11cbc79b199a26a63beee013e257b1bb7157d19705934f7b8b9b8f64386e12211d4dd4b538629174185682634'
+hash-format = 'sha512'
+mode = 'url'
+url = 'https://cdn.modrinth.com/data/JHdL51WR/versions/uQXgPO5v/kube-utils-20.1.1.jar'
+
+[update.modrinth]
+mod-id = 'JHdL51WR'
+version = 'uQXgPO5v'

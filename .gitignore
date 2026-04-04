@@ -1,0 +1,74 @@
+.claude/
+.playwright-mcp/
+.probe/
+claude_conversations.md
+codex_conversations.md
+gemini_conversations.md
+division_labour.md
+CLAUDE.md
+skills/artifacts/
+
+# OS and editor noise
+.DS_Store
+**/.DS_Store
+Thumbs.db
+desktop.ini
+.cache/
+*.swp
+*.swo
+*.orig
+*.rej
+.idea/
+.vscode/settings.json
+
+# Docs workspace output and temporary drafting material
+docs/node_modules/
+docs/.cache/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+docs/.vitepress/.temp/
+docs/.vitepress/dev.json
+docs/.vitepress/config.mts.timestamp*
+docs/output.html
+docs/route.bash
+docs/typefiles/
+docs/notes/
+docs/plans/
+docs/specs/
+
+# Minecraft runtime output
+logs/
+crash-reports/
+saves/
+screenshots/
+server-resource-packs/
+downloads/
+latest.log
+latest.log.*
+debug.log
+debug.log.*
+hs_err_pid*
+options.txt
+rhino.local.properties
+
+# Instance-local generated content
+local/
+kubejs/config/
+kubejs/assets/ponderjs_generated/
+visual_keybinder/
+config/ponderer/.initialized
+config/embeddium-fingerprint.json
+config/resourceful-config-web.json
+
+# Downloaded binaries and extracted default packs
+mods/*.jar
+mods/*.jar.disabled
+tacz/tacz_default_gun/
+tacz_backup/
+
+# Local exports and backups
+exports/
+backups/
+*.bak
+*.backup
+*.tmp

@@ -1,0 +1,17 @@
+filename = 'animationjs-1.20.1-0.1.2.jar'
+name = 'AnimationJS'
+side = ''
+x-prismlauncher-loaders = [ 'neoforge', 'forge' ]
+x-prismlauncher-mc-versions = [ '1.20.1', '1.20.1' ]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = '1.20.1-0.1.2'
+
+[download]
+hash = '6c31690d86db1c7fafb66b597548ca12f2a9e6b78f85e6311ef7d38acad87936021bebe8a2f41acb2afb11cfd35ed141f1ae3f1a0a188d3d82c0decb7acceec5'
+hash-format = 'sha512'
+mode = 'url'
+url = 'https://cdn.modrinth.com/data/ZNFoa8XX/versions/hDbohO7g/animationjs-1.20.1-0.1.2.jar'
+
+[update.modrinth]
+mod-id = 'ZNFoa8XX'
+version = 'hDbohO7g'

@@ -1,0 +1,17 @@
+filename = 'mbd2thread-1.1.44-1.20.1.jar'
+name = 'mbd2thread'
+side = 'server'
+x-prismlauncher-loaders = [ 'forge' ]
+x-prismlauncher-mc-versions = [ '1.20.1' ]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = 'mbd2thread-1.1.44-1.20.1.jar'
+
+[download]
+hash = '725ce6fc318e84d22a86615b3d9db92725bc6927'
+hash-format = 'sha1'
+mode = 'metadata:curseforge'
+url = ''
+
+[update.curseforge]
+file-id = 7765634
+project-id = 1469260

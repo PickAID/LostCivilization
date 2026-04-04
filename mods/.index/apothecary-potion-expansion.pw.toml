@@ -1,0 +1,17 @@
+filename = 'apothecary-1.2.5-1.20.1.jar'
+name = 'Apothecary - Potion Expansion'
+side = 'server'
+x-prismlauncher-loaders = [ 'forge' ]
+x-prismlauncher-mc-versions = [ '1.20.1' ]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = 'apothecary-1.2.5-1.20.1.jar'
+
+[download]
+hash = 'cc4a5e327e078d1a64e9c235e457e77884ecf825'
+hash-format = 'sha1'
+mode = 'metadata:curseforge'
+url = ''
+
+[update.curseforge]
+file-id = 7620316
+project-id = 1278100

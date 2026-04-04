@@ -1,0 +1,5 @@
+{
+    "loadFailed": "3D 模型加载失败",
+    "loadHint": "请检查模型地址和格式（.glb/.gltf）。",
+    "loading": "正在加载 3D 模型..."
+}

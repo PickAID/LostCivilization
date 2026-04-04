@@ -1,0 +1,110 @@
+/**
+ * Base Theme Variables
+ * Core theme colors, typography, and fundamental styling variables
+ */
+
+:root {
+    /* ===== BRAND & THEME COLORS ===== */
+    --vp-c-brand: #1565c0;
+    --vp-c-text-2: #546e7a;
+
+    /* ===== HERO SECTION ===== */
+    --vp-home-hero-image-background-image: linear-gradient(
+        140deg,
+        rgba(21, 101, 192, 0.2) 0%,
+        rgba(65, 136, 223, 0.14) 45%,
+        rgba(134, 175, 235, 0.18) 100%
+    );
+    --vp-home-hero-image-filter: blur(64px);
+    --hero-surface-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+    --hero-card-radius: 16px;
+    --hero-media-title-color: #f7fbff;
+    --hero-media-text-color: #eef5ff;
+    --hero-media-muted-color: #d3e2f5;
+    --hero-media-button-alt-text: #f6f9ff;
+    --hero-media-button-alt-bg: rgba(8, 16, 34, 0.34);
+    --hero-media-button-alt-hover-bg: rgba(8, 16, 34, 0.5);
+    --hero-media-button-alt-border: rgba(240, 248, 255, 0.34);
+    --hero-media-button-outline-text: #f6f9ff;
+    --hero-media-button-outline-bg: rgba(8, 16, 34, 0.18);
+    --hero-media-button-outline-hover-bg: rgba(8, 16, 34, 0.36);
+    --hero-media-button-outline-border: rgba(240, 248, 255, 0.45);
+    --hero-media-button-outline-border-hover: rgba(240, 248, 255, 0.68);
+
+    /* ===== CODE HIGHLIGHTING ===== */
+    --code-bg-color: var(--vp-c-brand-light);
+    --code-group-border-color: #cccac0;
+
+    /* ===== ICONS & IMAGES ===== */
+    --github-bg-image: var(--vp-github-bg-image-light);
+
+    /* ===== ANIMATION & TRANSITIONS ===== */
+    --transition-duration: 300ms;
+    --transition-easing: ease-in;
+    --hover-scale: 1.1;
+    --fade-duration: 0.5s;
+
+    /* ===== CODE ===== */
+    --vp-code-font-size: 1.1rem;
+
+    /* ===== GLOBAL SPACING ===== */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* ===== BORDER RADIUS ===== */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+    --border-radius-round: 50%;
+
+    /* ===== SHADOWS ===== */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --shadow-button: 2px 2px 10px 4px rgba(0, 0, 0, 0.15);
+}
+
+.dark {
+    /* ===== DARK THEME OVERRIDES ===== */
+    --vp-c-brand: #6e7aad;
+    --vp-c-text-2: #b0bec5;
+
+    /* ===== HERO SECTION (DARK) ===== */
+    --vp-home-hero-image-background-image: linear-gradient(
+        140deg,
+        rgba(73, 115, 196, 0.2) 0%,
+        rgba(90, 128, 202, 0.16) 40%,
+        rgba(119, 147, 208, 0.18) 100%
+    );
+    --vp-home-hero-image-filter: blur(72px);
+    --hero-surface-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+    --hero-media-title-color: #f2f6ff;
+    --hero-media-text-color: #e8f0ff;
+    --hero-media-muted-color: #bed2ec;
+    --hero-media-button-alt-text: #eef4ff;
+    --hero-media-button-alt-bg: rgba(7, 13, 29, 0.46);
+    --hero-media-button-alt-hover-bg: rgba(7, 13, 29, 0.62);
+    --hero-media-button-alt-border: rgba(196, 214, 238, 0.32);
+    --hero-media-button-outline-text: #edf3ff;
+    --hero-media-button-outline-bg: rgba(7, 13, 29, 0.26);
+    --hero-media-button-outline-hover-bg: rgba(7, 13, 29, 0.42);
+    --hero-media-button-outline-border: rgba(196, 214, 238, 0.5);
+    --hero-media-button-outline-border-hover: rgba(222, 233, 248, 0.72);
+
+    /* ===== CODE HIGHLIGHTING (DARK) ===== */
+    --code-bg-color: var(--vp-c-brand-dark);
+    --code-group-border-color: #242631;
+
+    /* ===== ICONS & IMAGES (DARK) ===== */
+    --github-bg-image: var(--vp-github-bg-image-dark);
+
+    /* ===== SHADOWS (DARK) ===== */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --shadow-button: 2px 2px 10px 4px rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,108 @@
+/**
+ * VPSteps — Vertical prose stepper
+ * Inspired by nuxt/ui Prose Steps
+ */
+
+.vp-steps {
+    --step-badge-size: 30px;
+    --step-connector-width: 2px;
+    --step-gap: 16px;
+
+    display: flex;
+    flex-direction: column;
+    margin: 20px 0;
+    padding: 0;
+}
+
+/* ===== ITEM ROW ===== */
+.vp-steps__item {
+    display: flex;
+    gap: var(--step-gap);
+    /* No bottom gap on item itself — connector line handles spacing */
+}
+
+/* ===== LEFT RAIL: badge + line ===== */
+.vp-steps__rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: var(--step-badge-size);
+}
+
+.vp-steps__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--step-badge-size);
+    height: var(--step-badge-size);
+    border-radius: 50%;
+    background: var(--vp-c-brand-1);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transition: background-color 0.2s ease;
+}
+
+.dark .vp-steps__badge {
+    background: var(--vp-c-brand-2);
+    color: var(--vp-c-bg);
+}
+
+.vp-steps__connector {
+    width: var(--step-connector-width);
+    flex: 1;
+    min-height: 20px;
+    background: var(--vp-c-divider);
+    margin: 4px 0;
+    border-radius: 1px;
+}
+
+/* ===== RIGHT BODY ===== */
+.vp-steps__body {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 28px;
+}
+
+/* Last item has no extra bottom padding */
+.vp-steps__item:last-child .vp-steps__body {
+    padding-bottom: 4px;
+}
+
+/* ===== TITLE ===== */
+.vp-steps__title {
+    /* Align vertically with the badge */
+    line-height: var(--step-badge-size) !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    border-top: none !important;
+    font-size: 16px !important;
+    font-weight: 700;
+    color: var(--vp-c-text-1);
+}
+
+/* ===== CONTENT (markdown rendered inside) ===== */
+.vp-steps__content > :first-child {
+    margin-top: 0;
+}
+
+.vp-steps__content > :last-child {
+    margin-bottom: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+    .vp-steps {
+        --step-badge-size: 26px;
+        --step-gap: 12px;
+    }
+
+    .vp-steps__title {
+        font-size: 15px !important;
+    }
+}

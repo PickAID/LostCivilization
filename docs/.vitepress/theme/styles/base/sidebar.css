@@ -1,0 +1,170 @@
+/**
+ * Beautiful VitePress Sidebar Design
+ * Based on original VitePress component structure
+ */
+
+.VPSidebarGroup .group + .group {
+    border-top: none !important;
+    margin-top: 6px;
+    padding-top: 0;
+}
+
+.VPSidebarItem .indicator {
+    display: none !important;
+}
+
+.VPSidebarItem.level-1 .items,
+.VPSidebarItem.level-2 .items,
+.VPSidebarItem.level-3 .items,
+.VPSidebarItem.level-4 .items,
+.VPSidebarItem.level-5 .items {
+    border-left: 1px solid color-mix(in srgb, var(--vp-c-divider) 62%, transparent) !important;
+    margin-left: 10px;
+    padding-left: 12px;
+}
+
+.VPSidebarItem .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    width: calc(100% - 8px);
+    min-height: 34px;
+    margin: 1px 4px;
+    padding: 6px 8px 7px;
+    border-radius: 6px;
+    background-color: transparent;
+    transition: color 0.18s ease;
+    position: relative;
+}
+
+.VPSidebarItem .item:hover,
+.VPSidebarItem.is-active > .item {
+    background-color: transparent;
+}
+
+.VPSidebarItem .text {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    font-size: 15px;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+    text-wrap: pretty;
+    transition: color 0.18s ease;
+}
+
+.VPSidebarItem.level-0 .text {
+    font-family: "Playfair Display", "EB Garamond", ui-serif, Georgia, serif;
+    font-size: 18px;
+    font-weight: 800 !important;
+    color: var(--vp-c-text-1);
+}
+
+.VPSidebarItem.level-1 .text,
+.VPSidebarItem.level-2 .text,
+.VPSidebarItem.level-3 .text,
+.VPSidebarItem.level-4 .text,
+.VPSidebarItem.level-5 .text {
+    font-size: 14px;
+    font-weight: 700 !important;
+    color: var(--vp-c-text-2);
+}
+
+.VPSidebarItem.level-0.is-link > .item > .link:hover .text,
+.VPSidebarItem.level-1.is-link > .item > .link:hover .text,
+.VPSidebarItem.level-2.is-link > .item > .link:hover .text,
+.VPSidebarItem.level-3.is-link > .item > .link:hover .text,
+.VPSidebarItem.level-4.is-link > .item > .link:hover .text,
+.VPSidebarItem.level-5.is-link > .item > .link:hover .text,
+.VPSidebarItem.level-0.is-active > .item .link > .text,
+.VPSidebarItem.level-1.is-active > .item .link > .text,
+.VPSidebarItem.level-2.is-active > .item .link > .text,
+.VPSidebarItem.level-3.is-active > .item .link > .text,
+.VPSidebarItem.level-4.is-active > .item .link > .text,
+.VPSidebarItem.level-5.is-active > .item .link > .text {
+    color: var(--vp-c-brand-1);
+}
+
+.VPSidebarItem.level-0.is-active > .item .link > .text,
+.VPSidebarItem.level-1.is-active > .item .link > .text,
+.VPSidebarItem.level-2.is-active > .item .link > .text,
+.VPSidebarItem.level-3.is-active > .item .link > .text,
+.VPSidebarItem.level-4.is-active > .item .link > .text,
+.VPSidebarItem.level-5.is-active > .item .link > .text {
+    font-weight: 800 !important;
+}
+
+.VPSidebarItem .caret {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    margin-left: 4px;
+    margin-right: 0;
+    border-radius: 4px;
+    color: var(--vp-c-text-3);
+    transition: color 0.18s ease;
+}
+
+.VPSidebarItem .item:hover .caret {
+    color: var(--vp-c-text-2);
+    background-color: transparent;
+}
+
+.VPSidebarItem.is-active .caret {
+    color: var(--vp-c-brand-1);
+}
+
+.VPSidebarItem .caret-icon {
+    font-size: 14px;
+    transition: transform 0.22s ease;
+}
+
+.VPSidebarItem.collapsed .caret-icon {
+    transform: rotate(0deg);
+}
+
+.VPSidebarItem.level-1,
+.VPSidebarItem.level-2,
+.VPSidebarItem.level-3,
+.VPSidebarItem.level-4,
+.VPSidebarItem.level-5 {
+    margin-left: 0;
+}
+
+.VPSidebarItem.level-0 {
+    padding-bottom: 4px;
+}
+
+.VPSidebarItem.collapsed.level-0 {
+    padding-bottom: 2px;
+}
+
+.VPSidebarItem .link {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex-grow: 1;
+    width: 100%;
+    min-width: 0;
+    border-radius: 4px;
+    transition: color 0.18s ease;
+}
+
+.VPSidebarItem .item:focus-visible {
+    outline: 2px solid var(--vp-c-brand-1);
+    outline-offset: 1px;
+}
+
+.VPSidebarGroup .group {
+    max-width: calc(100% - 16px);
+    margin: 0 8px;
+}

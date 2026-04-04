@@ -1,0 +1,17 @@
+filename = 'visual_keybinder-1.20.1 - 0.1.12.jar'
+name = "Raw's Visual keybinder"
+side = ''
+x-prismlauncher-loaders = [ 'forge' ]
+x-prismlauncher-mc-versions = [ '1.20.1' ]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = 'visual_keybinder-1.20.1 - 0.1.12.jar'
+
+[download]
+hash = '88a524a32d540e49438bab2b28d3f8188eac1fa3'
+hash-format = 'sha1'
+mode = 'metadata:curseforge'
+url = ''
+
+[update.curseforge]
+file-id = 7776129
+project-id = 1020759

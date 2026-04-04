@@ -1,0 +1,17 @@
+filename = 'tooltipoverhaul-forge-1.20.1-1.4.3.jar'
+name = 'Tooltip Overhaul'
+side = ''
+x-prismlauncher-loaders = [ 'forge' ]
+x-prismlauncher-mc-versions = [ '1.20', '1.20.1' ]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = '[FORGE] Tooltip Overhaul 1.4.3-1.20.1'
+
+[download]
+hash = 'd3e2ce89fd870d496dd0a86c635305a3f34825c1'
+hash-format = 'sha1'
+mode = 'metadata:curseforge'
+url = ''
+
+[update.curseforge]
+file-id = 7672584
+project-id = 1327508

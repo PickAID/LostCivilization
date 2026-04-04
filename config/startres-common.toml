@@ -1,0 +1,24 @@
+#化身开始跟随玩家的距离（格）
+#Range: 1.0 ~ 100.0
+follow_distance = 12.0
+#化身停止跟随玩家的距离（格）
+#Range: 1.0 ~ 50.0
+stop_follow_distance = 4.0
+#化身跟随玩家的移动速度
+#Range: 0.1 ~ 5.0
+follow_speed = 1.2
+#是否启用化身传送功能
+enable_teleport = true
+#化身传送到玩家身边的距离（格）
+#Range: 10.0 ~ 1000.0
+teleport_distance = 64.0
+#化身游荡范围（格）
+#Range: 1.0 ~ 50.0
+wander_range = 8.0
+#允许Shift+右键切换化身模式（切换Boss化身可能导致坏档!）
+mode_switch_enabled = false
+#是否隐藏名字以指定前缀开头的 Boss 血条
+hide_incarnation_bossbar = true
+#隐藏Boss血条的前缀
+bossbar_hide_prefix = "化身:"
+

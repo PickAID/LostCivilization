@@ -1,0 +1,30 @@
+filename = 'FetchJS-1.0.0.jar'
+name = 'FetchJS'
+side = ''
+x-prismlauncher-loaders = [ 'forge' ]
+x-prismlauncher-mc-versions = [
+    '1.20.1',
+    '1.20.1',
+    '1.20.2',
+    '1.20.2',
+    '1.20.3',
+    '1.20.3',
+    '1.20.4',
+    '1.20.4',
+    '1.20.5',
+    '1.20.5',
+    '1.20.6',
+    '1.20.6'
+]
+x-prismlauncher-release-type = 'release'
+x-prismlauncher-version-number = '1.0.0'
+
+[download]
+hash = '9b88d9672d4d89402789184b549abdc1c01b0ad3a318f21b5650a3b42f4e00a2bbf316fc73420acc0670b8e71ea07c8ba08499339b4114887548d4da19851b1e'
+hash-format = 'sha512'
+mode = 'url'
+url = 'https://cdn.modrinth.com/data/zk5JLatm/versions/MDicdOzp/FetchJS-1.0.0.jar'
+
+[update.modrinth]
+mod-id = 'zk5JLatm'
+version = 'MDicdOzp'

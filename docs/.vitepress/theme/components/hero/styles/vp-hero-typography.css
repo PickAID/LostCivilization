@@ -1,0 +1,223 @@
+@media (max-width: 959px) {
+    .VPHero.hero-premium--typography-grouped-float {
+        --hero-typo-node-factor: 0.48;
+        --hero-typo-group-factor: 0.26;
+        --hero-typo-image-factor: 0.44;
+        --hero-typo-image-group-factor: 0.22;
+        overflow-x: visible;
+    }
+
+    .VPHero.hero-premium--typography-grouped-float .container,
+    .VPHero.hero-premium--typography-grouped-float .main {
+        overflow: visible;
+    }
+
+    .VPHero.hero-premium--typography-grouped-float .main {
+        transform-origin: center 16%;
+    }
+
+    .VPHero.hero-premium--typography-grouped-float .image {
+        margin: 8px auto 0;
+    }
+
+    .VPHero.hero-premium--typography-grouped-float :deep(.name),
+    .VPHero.hero-premium--typography-grouped-float :deep(.text),
+    .VPHero.hero-premium--typography-grouped-float :deep(.tagline) {
+        width: 100%;
+        max-width: min(100%, calc(100vw - 64px));
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        transform-origin: center top;
+        text-wrap: pretty;
+    }
+}
+
+@media (max-width: 639px) {
+    .VPHero.hero-premium--typography-grouped-float {
+        --hero-typo-node-factor: 0.34;
+        --hero-typo-group-factor: 0.16;
+        --hero-typo-image-factor: 0.3;
+        --hero-typo-image-group-factor: 0.14;
+    }
+
+    .VPHero.hero-premium--typography-grouped-float .main {
+        transform-origin: center top;
+    }
+
+    .VPHero.hero-premium--typography-grouped-float :deep(.name),
+    .VPHero.hero-premium--typography-grouped-float :deep(.text),
+    .VPHero.hero-premium--typography-grouped-float :deep(.tagline) {
+        max-width: min(100%, calc(100vw - 40px));
+    }
+}
+
+@media (min-width: 960px) {
+    .VPHero.has-image .container {
+        text-align: left;
+    }
+
+    .VPHero.has-image :deep(.name),
+    .VPHero.has-image :deep(.text),
+    .VPHero.has-image :deep(.tagline) {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .VPHero.has-image :deep(.hero-actions) {
+        justify-content: flex-start;
+    }
+
+    .main {
+        order: 1;
+        width: calc((100% / 3) * 2);
+    }
+
+    .VPHero.has-image .main {
+        max-width: 620px;
+    }
+}
+
+@media (min-width: 960px) {
+    .VPHero.hero-premium--typography-slanted-wrap.has-image .container {
+        display: block;
+        position: relative;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image .main {
+        width: 100%;
+        max-width: none;
+        position: relative;
+        z-index: 2;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image .main::before {
+        content: "";
+        float: right;
+        width: clamp(320px, 34vw, 520px);
+        height: clamp(440px, 42vw, 640px);
+        shape-outside: ellipse(54% 50% at 50% 46%);
+        clip-path: ellipse(54% 50% at 50% 46%);
+        margin: -6px -8px 16px 24px;
+        pointer-events: none;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image .image {
+        position: absolute;
+        top: 50%;
+        right: clamp(-34px, -1.8vw, 18px);
+        margin: 0;
+        width: clamp(360px, 38vw, 620px);
+        height: clamp(360px, 37vw, 600px);
+        --hero-image-base-transform: translateY(-50%);
+        z-index: 1;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image .image-container {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        transform: none;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image :deep(.image-src) {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        animation-duration: 11s;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image :deep(.heading) {
+        display: block;
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image :deep(.name),
+    .VPHero.hero-premium--typography-slanted-wrap.has-image :deep(.text),
+    .VPHero.hero-premium--typography-slanted-wrap.has-image :deep(.tagline) {
+        display: block;
+        width: auto;
+        max-width: min(100%, 980px);
+    }
+
+    .VPHero.hero-premium--typography-slanted-wrap.has-image :deep(.tagline) {
+        max-width: min(100%, 860px);
+    }
+}
+
+@media (max-width: 768px) {
+    .VPHero.hero-premium--wave-priority {
+        padding-bottom: 112px;
+    }
+}
+
+.VPHero.hero-premium--media :deep(.hero-content--readable) {
+    color: var(--hero-media-text-color);
+}
+
+.VPHero.hero-premium--readable {
+    --vp-home-hero-name-color: var(--hero-media-title-color);
+    --vp-home-hero-name-background: none;
+    --vp-home-hero-text-color: var(--hero-media-title-color);
+    --vp-home-hero-tagline-color: var(--hero-media-muted-color);
+}
+
+.VPHero.hero-premium--readable :deep(.name) {
+    color: var(--hero-media-title-color);
+}
+
+.VPHero.hero-premium--readable :deep(.text) {
+    color: var(--hero-media-text-color);
+}
+
+.VPHero.hero-premium--readable :deep(.tagline) {
+    color: var(--hero-media-muted-color);
+}
+
+.VPHero.hero-premium--readable :deep(.name.clip) {
+    background: none !important;
+    -webkit-text-fill-color: currentColor;
+}
+
+:global(.VPNav.hero-nav-adaptive) {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom-color: transparent !important;
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+:global(.VPNav.hero-nav-adaptive .VPNavBarTitle .title),
+:global(.VPNav.hero-nav-adaptive .VPNavBarTitle .title span),
+:global(.VPNav.hero-nav-adaptive .VPNavBarMenuLink),
+:global(.VPNav.hero-nav-adaptive .VPFlyout .button),
+:global(.VPNav.hero-nav-adaptive .VPNavBarTranslations .title),
+:global(.VPNav.hero-nav-adaptive .VPNavBarMenuGroup .button),
+:global(.VPNav.hero-nav-adaptive .VPNavBar .VPButton .text),
+:global(.VPNav.hero-nav-adaptive .VPNavBar .button .text) {
+    color: var(--vp-nav-text-color, var(--hero-nav-text-color, currentColor));
+    transition: color 0.25s ease;
+}
+
+:global(.VPNav.hero-nav-adaptive .VPNavBarMenuLink:hover),
+:global(.VPNav.hero-nav-adaptive .VPNavBarMenuGroup .button:hover),
+:global(.VPNav.hero-nav-adaptive .VPFlyout .button:hover) {
+    color: var(
+        --vp-nav-text-hover-color,
+        var(--vp-nav-text-color, var(--hero-nav-text-color, currentColor))
+    );
+}
+
+:global(.VPNav.hero-nav-adaptive .VPNavBarHamburger .bar) {
+    background-color: var(
+        --vp-nav-text-color,
+        var(--hero-nav-text-color, currentColor)
+    );
+    transition: background-color 0.25s ease;
+}
+
+:global(.VPNav.hero-nav-adaptive .VPSocialLink) {
+    color: var(--vp-nav-text-color, var(--hero-nav-text-color, currentColor));
+    transition: color 0.25s ease;
+}

@@ -1,0 +1,196 @@
+.image {
+    position: relative;
+    order: 1;
+    margin: -64px -24px 0;
+    --hero-image-base-transform: translate3d(0, 0, 0);
+    transform:
+        var(--hero-image-base-transform)
+        translate3d(
+            calc(
+                var(--hero-typo-image-x, 0px) *
+                    var(--hero-typo-image-factor, 1)
+            ),
+            calc(
+                var(--hero-typo-image-y, 0px) *
+                    var(--hero-typo-image-factor, 1)
+            ),
+            0
+        )
+        translate3d(
+            calc(
+                var(--hero-typo-image-group-x, 0px) *
+                    var(--hero-typo-image-group-factor, 1)
+            ),
+            calc(
+                var(--hero-typo-image-group-y, 0px) *
+                    var(--hero-typo-image-group-factor, 1)
+            ),
+            0
+        )
+        rotate(
+            calc(
+                var(--hero-typo-image-rotate, 0deg) *
+                    var(--hero-typo-image-factor, 1)
+            )
+        )
+        scale(
+            calc(
+                1 +
+                    (var(--hero-typo-image-scale, 1) - 1) *
+                    var(--hero-typo-image-factor, 1)
+            )
+        )
+        scale(
+            calc(
+                1 +
+                    (var(--hero-typo-image-group-scale, 1) - 1) *
+                    var(--hero-typo-image-group-factor, 1)
+            )
+        );
+    transform-origin: 58% 52%;
+    transition:
+        transform var(--hero-typo-transition-duration, 560ms)
+            var(--hero-typo-transition-easing, cubic-bezier(0.2, 0.9, 0.2, 1)),
+        margin 0.25s ease;
+}
+
+.hero-image-float-enter-active,
+.hero-image-float-leave-active {
+    transition:
+        opacity 0.52s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.72s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.72s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-image-float-enter-from,
+.hero-image-float-leave-to {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
+    filter: blur(8px);
+}
+
+.hero-image-float-leave-to {
+    transform: translateY(-12px) scale(0.97);
+}
+
+@media (min-width: 640px) {
+    .image {
+        margin: -88px -24px -8px;
+    }
+}
+
+@media (min-width: 960px) {
+    .image {
+        flex-grow: 1;
+        order: 2;
+        margin: 0;
+        align-self: stretch;
+    }
+}
+
+.image-container {
+    position: relative;
+    margin: 0 auto;
+    width: 320px;
+    height: 320px;
+}
+
+@media (min-width: 640px) {
+    .image-container {
+        width: 392px;
+        height: 392px;
+    }
+}
+
+@media (min-width: 960px) {
+    .image-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        transform: translate(-24px, -16px);
+    }
+}
+
+.image-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 208px;
+    height: 208px;
+    border-radius: 24px;
+    background-image: var(--vp-home-hero-image-background-image);
+    filter: blur(56px);
+    transform: translate(-50%, -50%);
+}
+
+@media (min-width: 640px) {
+    .image-bg {
+        width: 264px;
+        height: 264px;
+    }
+}
+
+@media (min-width: 960px) {
+    .image-bg {
+        width: 324px;
+        height: 324px;
+    }
+}
+
+:deep(.image-src) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(220px, 100%);
+    height: min(220px, 100%);
+    max-width: 220px;
+    max-height: 220px;
+    transform: translate(-50%, -50%);
+    animation: hero-image-drift 9s ease-in-out infinite;
+    will-change: transform;
+}
+
+@media (min-width: 640px) {
+    :deep(.image-src) {
+        width: min(286px, 100%);
+        height: min(286px, 100%);
+        max-width: 286px;
+        max-height: 286px;
+    }
+}
+
+@media (min-width: 960px) {
+    :deep(.image-src) {
+        width: min(352px, 100%);
+        height: min(352px, 100%);
+        max-width: 352px;
+        max-height: 352px;
+    }
+}
+
+@keyframes hero-image-drift {
+    0%,
+    100% {
+        transform: translate(-50%, -50%) translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate(-50%, -50%) translate3d(0, -10px, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .VPHero.hero-premium--typography-grouped-float .image {
+        animation: none !important;
+    }
+
+    .hero-image-float-enter-active,
+    .hero-image-float-leave-active {
+        transition: none !important;
+    }
+
+    :deep(.image-src) {
+        animation: none !important;
+    }
+}
