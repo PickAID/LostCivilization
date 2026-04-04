@@ -61,8 +61,6 @@ config/embeddium-fingerprint.json
 config/resourceful-config-web.json
 
 # Downloaded binaries and extracted default packs
-mods/*.jar
-mods/*.jar.disabled
 tacz/tacz_default_gun/
 tacz_backup/
 
