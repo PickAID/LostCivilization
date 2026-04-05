@@ -70,3 +70,6 @@ backups/
 *.bak
 *.backup
 *.tmp
+.probe/*
+!.probe/probe-settings.json
+/mods/.index
