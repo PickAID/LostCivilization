@@ -4,9 +4,9 @@ description: Implementation contract for resonance, covering type skeletons, pur
 priority: 40
 ---
 
-# Resonance Implementation {#resonance-implementation}
+# Resonance implementation {#resonance-implementation}
 
-On the implementation side, resonance does one thing only: it folds site input and player input into `ResonanceResult`. It does not own site lifecycle, and it does not generate tooltip text directly.
+On the implementation side, resonance does one thing: it folds site input and player input into `ResonanceResult`. It does not own site lifecycle, and it does not generate tooltip text directly.
 
 ```mermaid
 flowchart LR
@@ -18,9 +18,9 @@ flowchart LR
     Snapshot --> Tooltip["Tooltip view RelicTooltipView"]
 ```
 
-## Verified Forge Boundaries {#verified-forge-boundaries}
+## Verified Forge boundaries {#verified-forge-boundaries}
 
-The following APIs are already verified and can define the implementation boundary:
+The following APIs are verified and define the implementation boundary:
 
 | Topic | Verified API | Conclusion |
 | --- | --- | --- |
@@ -28,9 +28,9 @@ The following APIs are already verified and can define the implementation bounda
 | tooltip read | `ItemTooltipEvent.getItemStack()`, `getToolTip()`, `getFlags()` | tooltip can read saved snapshots directly and append text |
 | null-player tooltip path | `ItemTooltipEvent.getEntity()` | startup and some client paths cannot depend on a player object |
 
-This means resonance results must enter the snapshot first, then tooltip reads the snapshot. Tooltip cannot query live runtime.
+Resonance results must enter the snapshot first; tooltip reads the snapshot. Tooltip cannot query live runtime.
 
-## Current Type Contract {#type-contract}
+## Current type contract {#type-contract}
 
 ```java
 public record SiteProfile(
@@ -55,7 +55,7 @@ public record ResonanceResult(
 
 `SiteProfile` and `RelicLoadout` keep input compact. `ResonanceResult` keeps output compact. That prevents the resolver signature from bloating as the system expands.
 
-## File Boundaries {#file-boundaries}
+## File boundaries {#file-boundaries}
 
 | File | Minimum responsibility |
 | --- | --- |
@@ -67,7 +67,7 @@ public record ResonanceResult(
 | `ResonanceResult` | compact output object |
 | `ResonanceResolver` | single evaluation entry point |
 
-## Pure Evaluation Constraints {#pure-evaluation-constraints}
+## Pure evaluation constraints {#pure-evaluation-constraints}
 
 `ResonanceResolver.resolve(site, loadout)` should remain a pure function.
 
@@ -93,13 +93,9 @@ public final class ResonanceResolver {
 }
 ```
 
-Keeping it pure gives us three concrete benefits:
+Keeping it pure pays off: unit tests can cover it directly, runtime/recovery/tooltip all read the same result, and the client doesn't need its own resonance copy.
 
-1. unit tests can cover it directly,
-2. runtime, recovery, and tooltip all read the same result,
-3. the client does not need a private copy of resonance logic.
-
-## Downstream Consumption Order {#downstream-consumption-order}
+## Downstream consumption order {#downstream-consumption-order}
 
 The implementation order stays fixed:
 
@@ -108,9 +104,9 @@ The implementation order stays fixed:
 3. recovery writes `state` and `patternKey` into `RecoveredRelicSnapshot`,
 4. `RelicTooltipView` only reads the snapshot and optional long-term knowledge.
 
-In this sequence, only runtime and recovery may interpret the result. Tooltip only formats it.
+Only runtime and recovery may interpret the result. Tooltip only formats it.
 
-## Minimum Test Matrix {#minimum-test-matrix}
+## Minimum test matrix {#minimum-test-matrix}
 
 | Site profile | Loadout | Expected result |
 | --- | --- | --- |
@@ -119,9 +115,9 @@ In this sequence, only runtime and recovery may interpret the result. Tooltip on
 | fallback | any unsupported combination | `DORMANT` + `generic.idle` |
 | tooltip with `player == null` | saved snapshot | still renders minimum text |
 
-## Implementation Red Lines {#implementation-red-lines}
+## Constraints {#implementation-red-lines}
 
-1. do not serialize live runtime objects directly into relics,
-2. do not let tooltip recalculate resonance,
-3. do not let the resolver read players, worlds, or the runtime registry,
-4. do not make `patternKey` a temporary string that only one UI page understands.
+1. Live runtime objects must not be serialized directly into relics.
+2. Tooltip must not recalculate resonance.
+3. The resolver must not read players, worlds, or the runtime registry.
+4. `patternKey` must not be a temporary string that only one UI page understands.

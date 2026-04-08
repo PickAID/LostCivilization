@@ -1,12 +1,12 @@
 ---
 title: 共鸣
-description: 共鸣阶段的实现契约，说明类型骨架、纯判定约束、tooltip 边界和最小测试集。
+description: 共鸣阶段的实现契约，说明类型结构、纯判定约束、tooltip 边界和最小测试集。
 priority: 40
 ---
 
 # 共鸣实现 {#resonance-implementation}
 
-实现侧的共鸣只做一件事：把遗址输入和玩家输入折叠成 `ResonanceResult`。它不持有现场生命周期，也不直接生成 tooltip。
+共鸣只做一件事：把遗址输入和玩家输入折叠成 `ResonanceResult`。它不持有现场生命周期，也不直接生成 tooltip。
 
 ```mermaid
 flowchart LR
@@ -28,9 +28,9 @@ flowchart LR
 | tooltip 读取 | `ItemTooltipEvent.getItemStack()`、`getToolTip()`、`getFlags()` | tooltip 可以直接读取已保存快照并追加文本 |
 | tooltip 空玩家 | `ItemTooltipEvent.getEntity()` | 启动阶段和部分客户端路径不能依赖玩家对象 |
 
-这意味着共鸣结果必须先进入快照，再由 tooltip 读取。tooltip 不能回查 live runtime。
+这意味着共鸣结果必须先进入快照，再由 tooltip 读取——tooltip 不能回查 live runtime。
 
-## 当前类型契约 {#type-contract}
+## 当前类型 {#type-contract}
 
 ```java
 public record SiteProfile(
@@ -53,9 +53,9 @@ public record ResonanceResult(
 ) {}
 ```
 
-`SiteProfile` 和 `RelicLoadout` 负责把输入收口，`ResonanceResult` 负责把输出收短。这样 resolver 的签名不会在后续扩展时失控。
+`SiteProfile` 和 `RelicLoadout` 负责整理输入，`ResonanceResult` 负责给出简短结果。这样以后加字段时，resolver 的签名也不会一路膨胀。
 
-## 文件级边界 {#file-boundaries}
+## 文件分工 {#file-boundaries}
 
 | 文件 | 最小职责 |
 | --- | --- |
@@ -64,7 +64,7 @@ public record ResonanceResult(
 | `ResonanceState` | 共鸣结果状态枚举 |
 | `SiteProfile` | 遗址输入对象 |
 | `RelicLoadout` | 玩家输入对象 |
-| `ResonanceResult` | 紧凑结果对象 |
+| `ResonanceResult` | 简短结果 |
 | `ResonanceResolver` | 唯一判定入口 |
 
 ## 纯判定约束 {#pure-evaluation-constraints}
@@ -93,7 +93,7 @@ public final class ResonanceResolver {
 }
 ```
 
-保持纯函数有三个直接好处：
+保持纯函数带来三个直接好处：
 
 1. 单元测试可以直接覆盖。
 2. runtime、recovery 和 tooltip 读到的是同一份结果。
@@ -101,7 +101,7 @@ public final class ResonanceResolver {
 
 ## 下游消费顺序 {#downstream-consumption-order}
 
-实现顺序固定如下：
+消费顺序固定如下：
 
 1. 激活或现场启动阶段计算 `ResonanceResult`。
 2. `ActiveSiteRuntime` 读取结果并执行现场后果。

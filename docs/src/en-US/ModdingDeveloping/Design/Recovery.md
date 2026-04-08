@@ -6,7 +6,7 @@ priority: 50
 
 # Recovery {#recovery}
 
-Recovery is the serialization boundary. After the site ends, only data that has been folded into a snapshot may continue into tooltip, codex, and later systems.
+Recovery is the serialization boundary. After the site ends, only snapshot data reaches tooltip, codex, and later systems.
 
 ```mermaid
 flowchart LR
@@ -18,7 +18,7 @@ flowchart LR
     Knowledge --> Codex
 ```
 
-## Three Result Types {#three-result-types}
+## Three result types {#three-result-types}
 
 | Layer | Stores |
 | --- | --- |
@@ -34,21 +34,17 @@ Relationship between them:
 
 The three can reference each other, but they cannot replace each other.
 
-## Long-Term Player Layer Rules {#player-long-term-layer-rules}
+## Long-term player layer rules {#player-long-term-layer-rules}
 
 If knowledge values live on player entity data, death and respawn must copy them through `PlayerEvent.Clone`. Otherwise cross-save persistence and cross-death migration become confused with one another.
 
-## Item Snapshot Layer Rules {#item-snapshot-layer-rules}
+## Item snapshot layer rules {#item-snapshot-layer-rules}
 
-Recovered relic snapshots should follow the item itself, not the player. The reasons are direct:
+Recovered relic snapshots follow the item itself, not the player. Three reasons: relics move through inventories, containers, drops, and trades; tooltip rendering may not have a player object; and a relic's recovered result should not disappear when the holder changes.
 
-1. relics move through inventories, containers, drops, and trades,
-2. tooltip rendering may not have a player object,
-3. one relic's recovered result should not disappear when the holder changes.
+Recovery therefore folds the minimum result into the `ItemStack`, not only into player data.
 
-Recovery therefore has to fold the minimum result into the `ItemStack`, not only into player data.
-
-## Tooltip Design Rules {#tooltip-design-rules}
+## Tooltip design rules {#tooltip-design-rules}
 
 `ItemTooltipEvent` may build tooltips without a player object. Tooltip is therefore limited to:
 
@@ -66,7 +62,7 @@ The read order should also stay fixed:
 
 Tooltip does not participate in evaluation.
 
-## Minimum Snapshot Object {#minimum-snapshot-object}
+## Minimum snapshot object {#minimum-snapshot-object}
 
 ```java
 public record RecoveredRelicSnapshot(
@@ -79,9 +75,9 @@ public record RecoveredRelicSnapshot(
 
 This object carries only the result that leaves the site. Current stability, guardian counts, covered chunks, and other tick-level state do not belong in the recovered relic snapshot.
 
-## Prohibited Items {#prohibited-items}
+## Prohibited items {#prohibited-items}
 
-1. putting every result back into player data,
+1. routing every result back through player data,
 2. letting tooltip recalculate resonance or site runtime,
 3. leaving recovery as a reward screen with no durable technical result,
 4. serializing per-tick site state directly into item results.

@@ -31,7 +31,7 @@ Resonance answers one question only: what state does this combination of `site p
 
 Resonance evaluates. Runtime and recovery execute consequences.
 
-## Result Contract {#result-contract}
+## Result contract {#result-contract}
 
 Version one keeps resonance output compact and stores only two fields:
 
@@ -40,13 +40,13 @@ Version one keeps resonance output compact and stores only two fields:
 | `state` | shared high-level state for runtime, recovery, and tooltip |
 | `patternKey` | stable pattern handle used by presentation, resolution, and text mapping |
 
-We keep the result short for three reasons:
+The result stays short for good reason:
 
 1. Runtime, recovery, and tooltip run at different times, but they all need the same result.
 2. The result enters snapshots and long-term data. Extra fields raise coupling immediately.
 3. If the result object grows too early, it will start absorbing runtime and UI details.
 
-## Object Layering {#object-layering}
+## Object layering {#object-layering}
 
 | Layer | Objects | Role |
 | --- | --- | --- |
@@ -57,7 +57,7 @@ We keep the result short for three reasons:
 
 These layers must not mix. If tooltip, runtime, or recovery all start adding their own local `if` logic, resonance has already drifted.
 
-## Consumption Rules {#consumption-rules}
+## Consumption rules {#consumption-rules}
 
 Resonance results are consumed in this order:
 
@@ -68,9 +68,9 @@ Resonance results are consumed in this order:
 
 If tooltip starts recalculating resonance on the fly, the resonance logic has already leaked into the client view layer.
 
-## Shared Gun Base Boundary {#shared-gun-base-boundary}
+## Resonance and TaCZ {#shared-gun-base-boundary}
 
-The current instance already ships the TaCZ stack and its extensions. Resonance should build on top of that shared firearm base instead of inventing another weapon system.
+The current instance already ships TaCZ and its extensions. Resonance should build on that gun system instead of inventing another weapon system.
 
 Resonance should:
 
@@ -84,7 +84,7 @@ Resonance should not:
 - hide all differentiation inside attachment numbers,
 - replace readable state evaluation with a black-box formula.
 
-## First Slice Validation {#first-slice-validation}
+## First slice validation {#first-slice-validation}
 
 The first slice only needs to prove that one ruin plus different builds produces different results.
 
@@ -96,7 +96,7 @@ The first slice only needs to prove that one ruin plus different builds produces
 
 If this difference holds consistently, resonance already has version-one value.
 
-## Design Red Lines {#design-red-lines}
+## Design red lines {#design-red-lines}
 
 1. runtime, recovery, and tooltip each maintaining their own resonance logic,
 2. the result object absorbing per-tick runtime state,

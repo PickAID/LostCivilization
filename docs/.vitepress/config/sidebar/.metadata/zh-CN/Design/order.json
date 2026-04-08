@@ -1,16 +1,16 @@
 {
   "PseudoInstance.md": {
-    "valueHash": "cfcd208495d565ef66e7dff9f98764da",
+    "valueHash": "98f13708210194c475687be6106a3b84",
     "isUserSet": false,
     "isActiveInStructure": true
   },
   "CivilizationShell.md": {
-    "valueHash": "cfcd208495d565ef66e7dff9f98764da",
+    "valueHash": "34173cb38f07f89ddbebc2ac9128303f",
     "isUserSet": false,
     "isActiveInStructure": true
   },
   "ArchaeologyLoop.md": {
-    "valueHash": "cfcd208495d565ef66e7dff9f98764da",
+    "valueHash": "d3d9446802a44259755d38e6d163e820",
     "isUserSet": false,
     "isActiveInStructure": true
   },
@@ -18,5 +18,30 @@
     "valueHash": "9982901219441adfebb6ec16dfe8a509",
     "isUserSet": false,
     "isActiveInStructure": true
+  },
+  "Survey.md": {
+    "valueHash": "d3d9446802a44259755d38e6d163e820",
+    "isUserSet": false,
+    "isActiveInStructure": false
+  },
+  "Activation.md": {
+    "valueHash": "98f13708210194c475687be6106a3b84",
+    "isUserSet": false,
+    "isActiveInStructure": false
+  },
+  "SiteRuntime.md": {
+    "valueHash": "34173cb38f07f89ddbebc2ac9128303f",
+    "isUserSet": false,
+    "isActiveInStructure": false
+  },
+  "Resonance.md": {
+    "valueHash": "d645920e395fedad7bbbed0eca3fe2e0",
+    "isUserSet": false,
+    "isActiveInStructure": false
+  },
+  "Recovery.md": {
+    "valueHash": "c0c7c76d30bd3dcaefc96f40275bdc0a",
+    "isUserSet": false,
+    "isActiveInStructure": false
   }
 }

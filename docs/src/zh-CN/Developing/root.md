@@ -1,8 +1,7 @@
 ---
 title: 开发
-description: 通用开发工作面的根配置。
+description: 项目结构、目录归属与当前工作区。
 root: true
 collapsed: false
 priority: 50
 ---
-

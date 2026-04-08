@@ -4,9 +4,9 @@ description: Forge-side implementation contract for early discovery and formal s
 priority: 10
 ---
 
-# Survey Implementation {#survey-implementation}
+# Survey implementation {#survey-implementation}
 
-Survey implementation now has two surfaces:
+Survey implementation has two parts:
 
 - early discovery implementation: make environmental archaeology points actually support brush, reveal, extraction, and exhaustion;
 - formal survey implementation: turn one valid submit into `SiteRef`, write it into the world ledger, then hand it to activation.
@@ -22,7 +22,7 @@ flowchart LR
     Ref --> Pending["Player short marker lc_pending_site_ref"]
 ```
 
-## Verified Capabilities {#verified-capabilities}
+## Verified capabilities {#verified-capabilities}
 
 | Capability | Verified method | Role |
 | --- | --- | --- |
@@ -32,13 +32,13 @@ flowchart LR
 | post-brush state switch | `BrushableBlock.getTurnsInto()` | turns hidden state into revealed state |
 | revealed-state extraction | `Block#use(BlockState, Level, BlockPos, Player, InteractionHand, BlockHitResult)` | extracts content and exhausts the node |
 | world ledger entry | `ServerLevel.getDataStorage()`, `DimensionDataStorage.computeIfAbsent(...)` | formal persistence entry point for survey |
-| formal submit surfaces | `PlayerInteractEvent.RightClickItem`, `PlayerInteractEvent.RightClickBlock` | collect formal survey submit context |
+| formal submit entry points | `PlayerInteractEvent.RightClickItem`, `PlayerInteractEvent.RightClickBlock` | collect formal survey submit context |
 
-## Early Discovery Implementation {#early-discovery-implementation}
+## Early discovery implementation {#early-discovery-implementation}
 
-The backbone of early discovery is no longer `RightClickItem` or `RightClickBlock`. It is the vanilla brush chain.
+The center of early discovery is not `RightClickItem` or `RightClickBlock`. It is the vanilla brush chain.
 
-### Recommended Class Shape {#recommended-class-shape}
+### Recommended class shape {#recommended-class-shape}
 
 ```java
 public final class EarlyExcavationBrushBlock extends BrushableBlock {
@@ -72,7 +72,7 @@ public final class SignalExcavationNodeBlockEntity extends BlockEntity {}
 
 That branch is only for a small set of explicit nodes. It does not replace the environmental carrier line.
 
-### Recommended State Machine {#recommended-state-machine}
+### Recommended state machine {#recommended-state-machine}
 
 1. Worldgen places `EarlyExcavationBrushBlock`.
 2. The player brushes it continuously and `BrushableBlockEntity.brush(...)` advances progress.
@@ -80,11 +80,11 @@ That branch is only for a small set of explicit nodes. It does not replace the e
 4. The player performs the extraction interaction on the revealed state.
 5. The node becomes a normal terrain block and permanently loses archaeology eligibility.
 
-## Formal Survey Implementation {#formal-survey-implementation}
+## Formal survey implementation {#formal-survey-implementation}
 
-Formal survey is the point where ruin instances, the world ledger, and pending activation references are created.
+Formal survey is where ruin instances, the world ledger, and pending activation references are created.
 
-### Minimum Data Structure {#minimum-data-structure}
+### Minimum data structure {#minimum-data-structure}
 
 ```java
 public record SiteRef(
@@ -102,7 +102,7 @@ public record DiscoveredSiteRecord(
 ) {}
 ```
 
-### World Ledger Entry {#world-ledger-entry}
+### World ledger entry {#world-ledger-entry}
 
 ```java
 SiteLedgerSavedData ledger = level.getDataStorage().computeIfAbsent(
@@ -114,7 +114,7 @@ SiteLedgerSavedData ledger = level.getDataStorage().computeIfAbsent(
 
 Call `setDirty()` only after creating a new record or changing lifecycle state.
 
-### Recommended Formal Survey Flow {#recommended-formal-survey-flow}
+### Recommended formal survey flow {#recommended-formal-survey-flow}
 
 1. `RightClickItem` or `RightClickBlock` collects the formal survey submit context.
 2. The system resolves the candidate `SiteTypeDefinition`.
@@ -122,7 +122,7 @@ Call `setDirty()` only after creating a new record or changing lifecycle state.
 4. If no record exists, it creates a new `DiscoveredSiteRecord`.
 5. It writes the string form of `SiteRef` into `lc_pending_site_ref`.
 
-### Structures, Biomes, And Instances {#structures-biomes-and-instances}
+### Structures, biomes, and instances {#structures-biomes-and-instances}
 
 | Layer | Implementation role |
 | --- | --- |
@@ -130,7 +130,7 @@ Call `setDirty()` only after creating a new record or changing lifecycle state.
 | biome adjustment | changes parameters only; does not define the instance key |
 | ruin instance reference | generated and stored by the ledger |
 
-## Player Data Boundary {#player-data-boundary}
+## Player data boundary {#player-data-boundary}
 
 | Data | Recommended home | Notes |
 | --- | --- | --- |
@@ -143,10 +143,10 @@ Early discovery does not write:
 - `DiscoveredSiteRecord`,
 - `SiteLedgerSavedData`.
 
-## Implementation Red Lines {#implementation-red-lines}
+## Constraints {#implementation-red-lines}
 
-1. do not make early discovery depend on the world ledger,
-2. do not require placement-time tagging for early discovery targets,
-3. do not let `RightClickItem` / `RightClickBlock` replace the brush-chain backbone of early discovery,
-4. do not put the full `DiscoveredSiteRecord` back into player data,
-5. do not allow mass-producible objects to become early archaeology targets.
+1. Early discovery must not depend on the world ledger.
+2. Early discovery targets must not require placement-time tagging.
+3. `RightClickItem` / `RightClickBlock` cannot replace the brush chain at the center of early discovery.
+4. The full `DiscoveredSiteRecord` must not be written back into player data.
+5. Mass-producible objects must not become early archaeology targets.

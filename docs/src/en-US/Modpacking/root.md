@@ -2,5 +2,5 @@
 root: true
 collapsed: false
 title: Modpacking
-description: Root configuration for the pack assembly surface.
+description: Mod assembly, config, scripts, and datapacks.
 ---

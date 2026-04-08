@@ -6,7 +6,7 @@ priority: 10
 
 # Survey {#survey}
 
-This page defines the formal boundary of the survey layer. Survey must be split into two stages: early discovery handles clues, materials, and environmental teaching; formal survey handles ruin instances, the world ledger, and pending activation references. Those two stages cannot be merged. If they are, early nodes start carrying teaching, location, persistence, and activation preconditions all at once.
+Survey splits into two stages that cannot be merged. Early discovery handles clues, materials, and environmental teaching. Formal survey handles ruin instances, the world ledger, and pending activation references. Collapsing them means early nodes end up carrying teaching, location, persistence, and activation preconditions all at once.
 
 ```mermaid
 flowchart LR
@@ -18,16 +18,16 @@ flowchart LR
     Ref --> Pending["Pending activation reference"]
 ```
 
-## Phase Definitions {#phase-definitions}
+## Phase definitions {#phase-definitions}
 
 | Phase | Input | Output | Does not do |
 | --- | --- | --- | --- |
 | early discovery | environmental carriers, brush interaction, explicit signal nodes | clues, fragments, materials, tooltip information, detector progress, general archaeology progress | does not create `SiteRef`, does not write `SiteLedgerSavedData`, does not enter activation |
 | formal survey | host structure, author marker or explicit host, submit action | `DiscoveredSiteRecord`, `SiteRef`, pending activation reference | does not replace environmental teaching, does not create live runtime directly |
 
-Early discovery answers "is this place worth further commitment?" Formal survey answers "has this become one formal ruin instance yet?" Those are different questions with different inputs, outputs, and data layers.
+Early discovery answers "is this place worth further commitment?" Formal survey answers "has this become one formal ruin instance yet?" Different questions, different inputs, different data layers.
 
-## Core Objects {#core-objects}
+## Core objects {#core-objects}
 
 | Object | Role |
 | --- | --- |
@@ -38,11 +38,11 @@ Early discovery answers "is this place worth further commitment?" Formal survey 
 | `DiscoveredSiteRecord` | the formal ruin record inside the world ledger |
 | `SiteLedgerSavedData` | the formal ruin ledger for one `ServerLevel` |
 
-## Early Discovery Nodes {#early-discovery-nodes}
+## Early discovery nodes {#early-discovery-nodes}
 
-Early discovery nodes do not instantiate ruins. They only convert environmental civilization traces into readable clues, then exhaust after one interaction. Early discovery must not depend on the world ledger and must not require world-data participation to prove an instance.
+Early discovery nodes do not instantiate ruins. They convert environmental civilization traces into readable clues, then exhaust after one interaction. Early discovery must not depend on the world ledger and must not require world-data participation to prove an instance.
 
-### Carrier Types {#carrier-types}
+### Carrier types {#carrier-types}
 
 | Carrier | Use | Constraint |
 | --- | --- | --- |
@@ -51,7 +51,7 @@ Early discovery nodes do not instantiate ruins. They only convert environmental 
 
 Environmental carriers provide broad distribution. Explicit nodes provide clarity at important positions. Neither enters the formal ledger.
 
-### Unified Interaction {#unified-interaction}
+### Unified interaction {#unified-interaction}
 
 Early discovery uses one fixed interaction: `brush reveal -> extraction -> exhausted return`.
 
@@ -66,9 +66,9 @@ Fixed three-state sequence:
 hidden archaeology block -> revealed archaeology block -> normal terrain block
 ```
 
-This split keeps revelation and extraction as two separate actions, which gives us clean hook points for hints, audiovisual feedback, and exhaustion.
+Revelation and extraction are two separate actions, which gives clean hook points for hints, audiovisual feedback, and exhaustion.
 
-### Recommended Node Definition {#recommended-node-definition}
+### Recommended node definition {#recommended-node-definition}
 
 ```java
 public record EarlyExcavationNodeDefinition(
@@ -81,14 +81,14 @@ public record EarlyExcavationNodeDefinition(
 ) {}
 ```
 
-These fields only define the early interaction:
+These fields cover only the early interaction:
 
 - `shellId` says which civilization trace family the node belongs to,
 - `brushLootTable` only handles early-discovery output,
 - `revealedState` and `exhaustedState` define the interaction state machine,
 - the definition does not carry formal ruin lifecycle, ledger keys, or `SiteRef`.
 
-### Anti-Automation Rules {#anti-automation-rules}
+### Anti-automation rules {#anti-automation-rules}
 
 Early discovery nodes may only come from:
 
@@ -105,21 +105,21 @@ The following are never valid archaeology targets:
 
 Machines may process archaeology later, but archaeology targets themselves cannot come from mass-producible sources. Otherwise the player can industrialize archaeology and bypass world distribution and exploration entirely.
 
-## Formal Survey {#formal-survey}
+## Formal survey {#formal-survey}
 
-Formal survey is the only entry point for `SiteRef`. It turns one valid submit into one formal ruin record and passes the stable instance reference to activation. If the content has not entered a formal record yet, it still belongs to early discovery.
+Formal survey is the only entry point for `SiteRef`. It turns one valid submit into one formal ruin record and passes the stable instance reference to activation. If content has not entered a formal record yet, it still belongs to early discovery.
 
-### Type And Instance Must Stay Separate {#type-and-instance-must-be-separated}
+### Type and instance must stay separate {#type-and-instance-must-be-separated}
 
 | Layer | Stores | Design role |
 | --- | --- | --- |
 | civilization shell | clue style, material families, outer traces, readable signals | organizes early discovery, not formal instances |
 | ruin type | host rules, activation rules, runtime parameters, resonance config | rule template for one kind of ruin |
-| ruin instance | dimension, anchor, covered chunks, lifecycle | authority object used by activation, runtime, and recovery |
+| ruin instance | dimension, anchor, covered chunks, lifecycle | instance record used by activation, runtime, and recovery |
 
 If type and instance collapse into one layer, same-type ruins cannot coexist and activation or recovery can no longer point at one stable ruin.
 
-### Fixed Priority For Formal Survey {#fixed-priority-for-formal-survey}
+### Fixed priority for formal survey {#fixed-priority-for-formal-survey}
 
 Formal survey always resolves in this order:
 
@@ -132,7 +132,7 @@ Formal survey always resolves in this order:
 
 The order is fixed: host and anchor first, instance after that. Only then can activation and recovery point at something stable.
 
-### Recommended Formal Record {#recommended-formal-record}
+### Recommended formal record {#recommended-formal-record}
 
 ```java
 public record SiteRef(
@@ -150,7 +150,7 @@ public record DiscoveredSiteRecord(
 ) {}
 ```
 
-`SiteRef` is the cross-stage handoff reference. `anchor`, together with dimension, becomes the stable coordinate truth inside the ledger.
+`SiteRef` is the cross-stage handoff reference. `anchor`, together with dimension, is the stable coordinate key inside the ledger.
 
 `coveredChunkKeys` is reserved for:
 
@@ -158,13 +158,13 @@ public record DiscoveredSiteRecord(
 - local cache support,
 - runtime coverage checks.
 
-It does not flow back into early discovery and it does not replace player short markers.
+It does not flow back into early discovery and does not replace player short markers.
 
-## Registration Rules For New Content {#registration-rules-for-new-content}
+## Registration rules for new content {#registration-rules-for-new-content}
 
-New content must declare a complete definition up front. We do not assemble ruin behavior from scattered conditions.
+New content must declare a complete definition up front. Ruin behavior is not assembled from scattered conditions.
 
-### Required Fields For New Early Discovery Nodes {#required-fields-for-new-early-discovery-nodes}
+### Required fields for new early discovery nodes {#required-fields-for-new-early-discovery-nodes}
 
 | Field | Required | Role |
 | --- | --- | --- |
@@ -175,7 +175,7 @@ New content must declare a complete definition up front. We do not assemble ruin
 | revealed state | yes | state after brush completion |
 | exhausted state | yes | normal state after extraction |
 
-### Required Fields For New Formal Ruin Types {#required-fields-for-new-formal-site-types}
+### Required fields for new formal ruin types {#required-fields-for-new-formal-site-types}
 
 | Field | Required | Role |
 | --- | --- | --- |
@@ -183,11 +183,11 @@ New content must declare a complete definition up front. We do not assemble ruin
 | host rule | yes | structure tag, author marker, or explicit host |
 | anchor rule | yes | search radius, center resolution, and final verification |
 | biome adjustment | optional | parameter adjustment only; does not define the instance key |
-| activation rule | yes | limits which submit surfaces can activate the site |
+| activation rule | yes | limits which submit entry points can activate the site |
 | runtime parameters | yes | read by the site runtime |
 | resonance config id | yes | consumed by `ResonanceResolver` |
 
-## Prohibited Items {#prohibited-items}
+## Prohibited items {#prohibited-items}
 
 1. letting early discovery create `SiteRef`,
 2. letting early discovery write `SiteLedgerSavedData`,

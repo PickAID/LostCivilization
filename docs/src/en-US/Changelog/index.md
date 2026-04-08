@@ -14,9 +14,9 @@ flowchart LR
 
 ## 2026-04-04 {#2026-04-04}
 
-### Permanent Documentation Formalization {#documentation-formalization}
+### Permanent documentation formalization {#documentation-formalization}
 
-The permanent documentation surfaces went through a full consolidation pass on this date. The important part was not page count. The important part was moving rules that had been scattered across temporary planning files, showcase-style writing, and local notes back into permanent pages.
+The permanent documentation pages went through a full consolidation pass on this date. Page count wasn't the point. The goal was getting rules out of temporary planning files, showcase-style writing, and local notes and back into permanent pages.
 
 The main pages consolidated in this pass include:
 
@@ -25,7 +25,7 @@ The main pages consolidated in this pass include:
 - the survey, activation, site-runtime, resonance, and recovery design and implementation pages under `ModdingDeveloping`,
 - the catalogue or rule pages under `Developing`, `Grouping`, `Modpacking`, and `Contribute`.
 
-### Documentation Rules Locked {#documentation-rules-locked}
+### Documentation rules locked {#documentation-rules-locked}
 
 This date also locked the current documentation standard:
 
@@ -35,7 +35,7 @@ This date also locked the current documentation standard:
 4. `ModdingDeveloping` is Forge-side runtime only; pack work, KubeJS, and datapacks belong in `Modpacking`.
 5. The docs keep a direct project voice instead of presentation-copy phrasing.
 
-### First-Version Direction Clarified {#first-version-direction}
+### First-version direction clarified {#first-version-direction}
 
 By this point, the first-version direction was fixed as follows:
 
@@ -43,11 +43,11 @@ By this point, the first-version direction was fixed as follows:
 - the site model stays with a local pseudo-instance instead of a separate dungeon dimension,
 - activation is centered on `ActivationService` rather than a single hard-coded right-click path,
 - resonance performs evaluation only, and tooltip layers read saved snapshots only,
-- `TaCZ` and its current extension stack remain the shared firearm base instead of splitting into multiple weapon systems.
+- The project keeps using `TaCZ` and its current extensions instead of splitting into multiple weapon systems.
 
 ## 2026-04-03 {#2026-04-03}
 
-### Documentation Foundation {#documentation-foundation}
+### Documentation foundation {#documentation-foundation}
 
 The project established the current documentation tree on this date:
 
@@ -59,9 +59,9 @@ The project established the current documentation tree on this date:
 - `Contribute`
 - `Changelog`
 
-That split separated showcase, development, integration, runtime, and contributor rules into fixed subtrees.
+Showcase, development, integration, runtime, and contributor rules each got a fixed subtree — separated from the start.
 
-### Core Loop Consolidation {#core-loop-consolidation}
+### Core loop consolidation {#core-loop-consolidation}
 
 The project main line was also reduced to one explicit chain on the same day:
 

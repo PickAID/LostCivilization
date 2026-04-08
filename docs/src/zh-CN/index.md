@@ -4,7 +4,7 @@ title: 失落文明
 hero:
   name: 失落文明
   text: 遗址主循环、运行时架构与整合协作技术文档。<br/>从前期发现到回收，覆盖设计定稿与实现边界。
-  tagline: 面向当前工作区，收口正式记录、运行态、共鸣、回收与整合边界。
+  tagline: 面向当前工作区，整理正式记录、运行态、共鸣、回收与整合边界。
   actions:
     - theme: brand
       text: 开发
@@ -33,11 +33,11 @@ hero:
             position: "0%"
           - color:
               light: "rgba(201, 143, 63, 0.88)"
-              dark: "rgba(39, 86, 108, 0.92)"
+              dark: "rgba(50, 30, 10, 0.94)"
             position: "38%"
           - color:
               light: "rgba(63, 94, 110, 0.98)"
-              dark: "rgba(8, 13, 21, 0.99)"
+              dark: "rgba(9, 5, 2, 0.99)"
             position: "100%"
     readability:
       mode: auto
@@ -76,7 +76,7 @@ hero:
       dark: "rgba(20, 31, 41, 0.72)"
 features:
   - title: 遗址主循环
-    details: 汇总阶段定义、定位记录、账本结构与群系和结构的优先级规则。
+    details: 汇总阶段定义、定位记录、持久化数据结构与群系和结构的优先级规则。
     link: /zh-CN/Design/ArchaeologyLoop
     linkText: 查看主循环
   - title: 前期发现
@@ -92,7 +92,7 @@ features:
     link: /zh-CN/ModdingDeveloping/Design/Activation
     linkText: 查看激活
   - title: 现场运行态
-    details: 说明世界账本、chunk 辅助数据、同步分层与运行态对象边界。
+    details: 说明存档持久化数据、chunk 辅助数据、同步分层与运行态对象边界。
     link: /zh-CN/ModdingDeveloping/Design/SiteRuntime
     linkText: 查看运行态
   - title: 共鸣
@@ -111,15 +111,11 @@ features:
     details: 说明 docs、pack 内容与未来 Java 运行时源码树的责任划分。
     link: /zh-CN/Developing/Architecture
     linkText: 查看架构
-  - title: 推进顺序
-    details: 固定第一版预算、竖切片顺序与哪些扩张项必须后置。
-    link: /zh-CN/Developing/Workflow
-    linkText: 查看流程
 ---
 
 ## 当前范围 {#current-scope}
 
-- 第一条正式竖切片固定为 `前期发现 -> 正式勘探 -> 激活 -> 运行态 -> 共鸣 -> 回收`。正式实例、运行态和回收结果分别落在不同权威层，不混写到玩家数据、chunk 缓存或 tooltip。
+- 第一条正式竖切片就是 `前期发现 -> 正式勘探 -> 激活 -> 运行态 -> 共鸣 -> 回收`。正式实例、运行态和回收结果分别落在不同状态层，不混写到玩家数据、chunk 缓存或 tooltip。
 - `ModdingDeveloping` 只覆盖 Forge 侧 Java 运行时；脚本、配置、数据包和模组装配统一写在 `Modpacking` 与 `Developing`。
-- 前期考古维持环境节点、刷扫揭露、提取耗尽和反自动化约束；正式遗址只在正式勘探后入账，不在早期节点阶段创建。
-- TaCZ 继续作为共享枪械底座；文明差异落在前期信号、激活条件、现场压力、共鸣结果与回收结果。
+- 前期考古维持环境节点、刷扫揭露、提取耗尽和反自动化约束；正式遗址只在正式勘探后写入正式记录，不在早期节点阶段创建。
+- 继续使用 TaCZ 这一套枪械系统；文明差异落在前期信号、激活条件、现场压力、共鸣结果与回收结果。

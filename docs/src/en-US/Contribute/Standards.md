@@ -6,9 +6,9 @@ priority: 20
 
 # Standards {#standards}
 
-This page records only the documentation standards that are already locked. It does not track personal preference. It tracks the rules this site must keep consistent.
+This page records the documentation standards this site must keep consistent.
 
-## Files And Headings {#files-and-headings}
+## Files and headings {#files-and-headings}
 
 | Item | Rule |
 | --- | --- |
@@ -17,7 +17,7 @@ This page records only the documentation standards that are already locked. It d
 | locale structure | keep `en-US` and `zh-CN` mirrored |
 | heading anchors | every heading uses an explicit English anchor in the form `Heading {#english-slug}` |
 
-## Navigation And Mermaid {#navigation-and-mermaid}
+## Navigation and Mermaid {#navigation-and-mermaid}
 
 | Item | Rule |
 | --- | --- |
@@ -26,7 +26,7 @@ This page records only the documentation standards that are already locked. It d
 | Mermaid text | write labels directly without `<div>` or HTML wrappers |
 | hero text | HTML line breaks are acceptable there, but not inside Mermaid |
 
-## Writing Rules {#writing-rules}
+## Writing rules {#writing-rules}
 
 1. Write in direct, concrete language.
 2. Define objects, phases, data structures, and boundaries before examples.
@@ -34,7 +34,7 @@ This page records only the documentation standards that are already locked. It d
 4. Distinguish verified fact, current rule, and deferred work.
 5. If a real object name or verified API exists, use it instead of vague topic words.
 
-## Boundary Rules {#boundary-rules}
+## Boundary rules {#boundary-rules}
 
 | Content | Belongs in |
 | --- | --- |
@@ -42,13 +42,13 @@ This page records only the documentation standards that are already locked. It d
 | Forge runtime, lifecycle, and state ownership | `ModdingDeveloping` |
 | KubeJS, datapacks, config, and mod assembly | `Modpacking` |
 | workspace structure, delivery order, and responsibility lines | `Developing` |
-| contribution rules and documentation workflow | `Contribute` |
+| contribution rules and writing rules | `Contribute` |
 
 The most common failure is still putting pack-side work into `ModdingDeveloping`. That is not allowed.
 
-## Source-Of-Truth Rules {#source-of-truth-rules}
+## What counts as current source {#source-of-truth-rules}
 
 1. Real files in the current instance come first.
-2. Permanent pages carry long-term project truth.
-3. Chat, scratch notes, and temporary plans are not long-term entry points.
-4. Once project truth changes, the owning permanent page must change with it.
+2. Permanent pages under `docs/src/` record long-term rules and boundaries.
+3. Chat, scratch notes, and temporary plans are not formal documentation.
+4. When project rules change, the owning page must change with them.

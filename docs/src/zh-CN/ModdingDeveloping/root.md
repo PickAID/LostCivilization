@@ -2,5 +2,5 @@
 root: true
 collapsed: false
 title: 模组开发
-description: 用于自定义模组开发的根配置。
+description: Forge 侧遗址系统设计与实现。
 ---

@@ -4,9 +4,9 @@ description: Forge-side implementation contract for activation, including Activa
 priority: 20
 ---
 
-# Activation Implementation {#activation-implementation}
+# Activation implementation {#activation-implementation}
 
-The implementation backbone of activation is now `ActivationService`. Events and items only build context. Ledger validation, runtime open, and short-marker cleanup all happen in the service layer.
+Activation implementation revolves around `ActivationService`. Events and items only build context. Ledger validation, runtime open, and short-marker cleanup all happen in the service layer.
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,7 @@ flowchart LR
     Registry --> Clear["Clear lc_pending_site_ref"]
 ```
 
-## Verified Events And Methods {#verified-events-and-methods}
+## Verified events and methods {#verified-events-and-methods}
 
 | Event or method | Verified interface | Role |
 | --- | --- | --- |
@@ -28,7 +28,7 @@ flowchart LR
 | `PlayerEvent.PlayerChangedDimensionEvent` | `getFrom()`, `getTo()` | teardown when the player leaves the site dimension |
 | `LevelEvent.Unload` | event itself verified | cleanup registry state when the level unloads |
 
-## Recommended Object Skeleton {#recommended-object-skeleton}
+## Recommended object skeleton {#recommended-object-skeleton}
 
 ```java
 public interface ActivationAdapter {
@@ -55,13 +55,13 @@ public final class SiteRuntimeBridge {
 }
 ```
 
-These are three different layers:
+These are three distinct layers:
 
 - adapters answer where the submit came from,
 - the service layer answers whether the site may open,
 - `SiteRuntimeBridge` answers how to create the runtime object.
 
-## Adapter Mapping {#adapter-mapping}
+## Adapter mapping {#adapter-mapping}
 
 | Adapter | Current recommendation |
 | --- | --- |
@@ -69,9 +69,9 @@ These are three different layers:
 | `ItemActivationAdapter` | builds context from `RightClickItem`; suitable for activators, detectors, and key-like items |
 | `MachineActivationAdapter` | reserved for later machine-based activation or machine archaeology |
 
-MVP can start with the first two. The machine adapter should keep an interface slot, but should not freeze an event source yet.
+MVP can start with the first two. The machine adapter should keep an interface slot, but its event source should not be frozen yet.
 
-## Minimum Activation Flow {#minimum-activation-flow}
+## Minimum activation flow {#minimum-activation-flow}
 
 1. An adapter builds `ActivationContext` from the player, current `ServerLevel`, and pending reference.
 2. `ActivationService` reads the `SiteRef` from `lc_pending_site_ref`.
@@ -81,7 +81,7 @@ MVP can start with the first two. The machine adapter should keep an interface s
 6. `SiteRuntimeRegistry` registers the live state.
 7. `lc_pending_site_ref` is cleared.
 
-## Stale Reference Handling {#stale-reference-handling}
+## Stale reference handling {#stale-reference-handling}
 
 | Situation | Handling |
 | --- | --- |
@@ -90,7 +90,7 @@ MVP can start with the first two. The machine adapter should keep an interface s
 | record already `ACTIVE` | do not create a second runtime |
 | record already recovered or aborted | clear short marker and reject |
 
-## Dimension Change And Unload {#dimension-change-and-unload}
+## Dimension change and unload {#dimension-change-and-unload}
 
 `PlayerEvent.PlayerChangedDimensionEvent` and `LevelEvent.Unload` are teardown hooks, not activation entry points.
 
@@ -99,9 +99,9 @@ MVP can start with the first two. The machine adapter should keep an interface s
 | `PlayerChangedDimensionEvent` | if the player is bound to a runtime, close it, unbind it, or move it into safe teardown |
 | `LevelEvent.Unload` | delete active runtimes under that level and clear invalid bindings |
 
-## Activation Implementation Red Lines {#activation-implementation-red-lines}
+## Constraints {#activation-implementation-red-lines}
 
-1. do not maintain the runtime master table inside interaction events,
-2. do not let `RightClickBlock` stand in for the whole activation architecture,
-3. do not make the service layer re-run survey logic,
-4. do not keep stale `lc_pending_site_ref`.
+1. The runtime master table must not live inside interaction events.
+2. `RightClickBlock` cannot substitute for the whole activation architecture.
+3. The service layer must not re-run survey logic.
+4. Stale `lc_pending_site_ref` entries must be cleared promptly — do not leave them dangling.

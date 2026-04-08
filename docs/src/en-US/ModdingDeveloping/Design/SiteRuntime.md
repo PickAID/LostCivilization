@@ -4,9 +4,9 @@ description: Design boundary for the world ledger, live runtime state, chunk cac
 priority: 30
 ---
 
-# Site Runtime {#site-runtime}
+# Site runtime {#site-runtime}
 
-Site runtime connects one ledger-backed ruin to one active field event. This page answers only four things: what the ledger stores, what the registry stores, what the chunk layer stores, and what the client is allowed to read.
+Site runtime is the bridge between a ledger-backed ruin and an active field event. Four questions: what the ledger stores, what the registry stores, what the chunk layer stores, and what the client is allowed to read.
 
 ```mermaid
 flowchart LR
@@ -16,7 +16,7 @@ flowchart LR
     Runtime --> ClientView["Client presentation and hints"]
 ```
 
-## Four-Layer Model {#four-layer-model}
+## Four-layer model {#four-layer-model}
 
 | Layer | Authority object | Stores | Lifecycle |
 | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ flowchart LR
 | live runtime layer | `SiteRuntimeRegistry`, `ActiveSiteRuntime` | pressure, phase, owner, local events | exists only while the site is active |
 | chunk and client support layer | `ChunkSiteAuxData`, sync payloads | local presentation, visibility, minimum client view | tied to chunk lifecycle and watch state |
 
-## Identity And Indexes {#identity-and-indexes}
+## Identity and indexes {#identity-and-indexes}
 
 | Identifier | Layer | Role |
 | --- | --- | --- |
@@ -34,9 +34,9 @@ flowchart LR
 | `primaryChunkKey`, `coveredChunkKeys` | ledger + runtime | keep chunk sync, cache, and coverage on one stable key set |
 | `UUID owner` | runtime | constrains player or team ownership |
 
-External handoff keeps using `SiteRef`. World truth resolves back to the coordinate key. Chunk events only operate on `coveredChunkKeys`.
+External handoff keeps using `SiteRef`. Formal records resolve back to the coordinate key. Chunk events only operate on `coveredChunkKeys`.
 
-## Ledger Fields {#ledger-fields}
+## Ledger fields {#ledger-fields}
 
 The world ledger should at minimum store:
 
@@ -50,7 +50,7 @@ The world ledger should at minimum store:
 
 The ledger does not store per-tick pressure, local enemy state, or temporary disturbances. Those belong to runtime.
 
-## Runtime Registry {#runtime-registry}
+## Runtime registry {#runtime-registry}
 
 Recommended registry shape:
 
@@ -68,9 +68,9 @@ public final class SiteRuntimeRegistry {
 | `sitesByChunk` | supports chunk load/unload, watch sync, and local cache lookup |
 | `siteByOwner` | prevents one owner from occupying multiple formal ruins |
 
-`ActivationService` resolves `SiteRef` into the ledger record, then normalizes it to one coordinate key before registration. Entry surfaces can vary. The runtime master table should not.
+`ActivationService` resolves `SiteRef` into the ledger record, then normalizes it to one coordinate key before registration. Entry points can vary. The runtime master table should not.
 
-## Recommended Runtime Object {#recommended-runtime-objects}
+## Recommended runtime object {#recommended-runtime-objects}
 
 ```java
 public final class ActiveSiteRuntime {
@@ -90,9 +90,9 @@ public record RuntimeFootprint(
 ) {}
 ```
 
-## Coverage Chunk Algorithm {#coverage-chunk-algorithm}
+## Coverage chunk algorithm {#coverage-chunk-algorithm}
 
-If runtime interacts with chunk lifecycle, it needs a stable footprint rule first. Once `coveredChunkKeys` are written into the ledger, runtime should not re-derive ruin truth every time a chunk enters memory.
+If runtime interacts with chunk lifecycle, it needs a stable footprint rule first. Once `coveredChunkKeys` are written into the ledger, runtime should not re-identify the ruin every time a chunk enters memory.
 
 1. The ledger stores anchor `anchor`.
 2. Runtime parameters provide an event radius or active boundary.
@@ -106,7 +106,7 @@ As a result:
 - it may not delete the world ledger,
 - and runtime cannot be treated as a derivative of chunk loadedness.
 
-## World Ledger Versus Biome And Structure {#world-ledger-biome-structure-relationship}
+## World ledger versus biome and structure {#world-ledger-biome-structure-relationship}
 
 The ledger only stores resolved results. It does not preserve half-finished "structure decided one half, biome decided the other half" logic. After resolution, the ledger should contain only:
 
@@ -116,7 +116,7 @@ The ledger only stores resolved results. It does not preserve half-finished "str
 - lifecycle state,
 - stable fields required by runtime and recovery.
 
-## State Transitions {#state-transitions}
+## State transitions {#state-transitions}
 
 | Input phase | Output phase | Allowed writes |
 | --- | --- | --- |
@@ -128,7 +128,7 @@ The ledger only stores resolved results. It does not preserve half-finished "str
 
 `chunk unload` and `player unwatch` are not ruin lifecycle events. They only manage the support layer.
 
-## Client Rules {#client-layer-rules}
+## Client rules {#client-layer-rules}
 
 The client may read only:
 
@@ -136,10 +136,10 @@ The client may read only:
 - saved recovery snapshots,
 - chunk-local data that the server explicitly syncs.
 
-The client may not infer ledger truth and may not persist runtime state.
+The client may not infer ledger records and may not persist runtime state.
 
-## Design No-Go Zones {#design-no-go-zones}
+## Design no-go zones {#design-no-go-zones}
 
-1. making runtime truth depend on chunk load state,
+1. making runtime existence depend on chunk load state,
 2. moving the world ledger into player short markers,
 3. turning the client presentation layer into a second state authority.

@@ -4,9 +4,9 @@ description: Formal runtime model for version-one site events, including boundar
 priority: 20
 ---
 
-# Pseudo Instance {#pseudo-instance}
+# Pseudo instance {#pseudo-instance}
 
-This page defines the runtime model for version-one site events. We use `pseudo instance` to mean a controlled, recoverable, cleanable site runtime built on top of a formal ruin record inside the original world. It is not a separate dimension, and it is not a larger version of a right-click interaction.
+A pseudo instance is a controlled, recoverable, cleanable site runtime built on top of a formal ruin record inside the original world. Not a separate dimension. Not a larger version of a right-click interaction. This page covers the version-one runtime model: what it owns, how it's structured, and how it lives and dies.
 
 ```mermaid
 flowchart LR
@@ -18,15 +18,13 @@ flowchart LR
     Runtime --> Recovery["Recovery and resolution"]
 ```
 
-## Adoption Boundary {#adoption-boundary}
+## Adoption boundary {#adoption-boundary}
 
-Version one adopts a pseudo-instance instead of a separate dimension for only three reasons:
+Version one uses a pseudo-instance instead of a separate dimension for three reasons:
 
-1. We already have reusable host structures and do not need a brand-new dungeon map first.
-2. The first slice needs to prove activation, site pressure, objective progress, and recovery, not teleportation and isolated world space.
+1. Reusable host structures already exist. A brand-new dungeon map isn't needed first.
+2. The first slice needs to prove activation, site pressure, objective progress, and recovery — not teleportation and isolated world space.
 3. A pseudo-instance is enough to support a ten-to-twenty-minute field action at much lower cost than a dimension solution.
-
-That gives us the following boundary:
 
 | Option | Used in version one | Conclusion |
 | --- | --- | --- |
@@ -34,9 +32,9 @@ That gives us the following boundary:
 | local sealed ruin | no | add later if the pseudo-instance proves itself |
 | separate dungeon dimension | no | expansion work, not version-one scope |
 
-## Ledger And Runtime Split {#ledger-and-runtime-split}
+## Ledger and runtime split {#ledger-and-runtime-split}
 
-Pseudo-instance state must stay separate from the world ledger. `SavedData` carries long-term truth. The pseudo-instance carries short-lived runtime state.
+Pseudo-instance state must stay separate from the world ledger. `SavedData` carries long-term records. The pseudo-instance carries short-lived runtime state.
 
 | Layer | Key | Stores |
 | --- | --- | --- |
@@ -61,9 +59,9 @@ public final class SiteRuntimeRegistry {
 - `sitesByChunk` supports local sync, cache cleanup, and coverage lookup.
 - `siteByOwner` prevents one player or team from occupying multiple formal ruins at once.
 
-## Coverage And Chunk Index {#coverage-and-chunk-index}
+## Coverage and chunk index {#coverage-and-chunk-index}
 
-In gameplay, a pseudo-instance feels like one field event. In implementation, it is a set of covered chunks. Version one can build that directly on verified APIs:
+In gameplay, a pseudo-instance feels like one field event. In implementation, it's a set of covered chunks. Version one can build that directly on verified APIs:
 
 | Use | Verified API | Role |
 | --- | --- | --- |
@@ -78,9 +76,9 @@ Recommended order:
 3. Expand `coveredChunkKeys` from `new ChunkPos(anchor)` with `ChunkPos.rangeClosed(centerChunk, chunkRadius)`.
 4. Register `coveredChunkKeys` into `sitesByChunk` for sync and cleanup.
 
-`ChunkEvent.Unload` should only clear temporary cache, local spawn indexes, and rendering hooks in that chunk. It should not delete the ruin and it should not rewrite ledger truth.
+`ChunkEvent.Unload` should only clear temporary cache, local spawn indexes, and rendering hooks in that chunk. It should not delete the ruin and it should not rewrite ledger records.
 
-## Activation Entry And Runtime Services {#activation-entry-and-runtime-services}
+## Activation entry and runtime services {#activation-entry-and-runtime-services}
 
 Activation can come from items, machines, or site devices, but those entry points should not each implement their own startup path. Version one routes all of them through `ActivationService`.
 
@@ -92,14 +90,14 @@ Activation can come from items, machines, or site devices, but those entry point
 | `SiteFeedbackService` | fog, sound, hints, and local presentation | does not hold authority state |
 | `RecoveryService` | resolution, ledger write-back, runtime teardown | does not drive in-site phase progress |
 
-This split fixes two rules:
+Two rules follow from this split:
 
 1. Activation sources can grow, but the runtime startup path stays singular.
 2. Runtime services operate on the same `ActiveSiteRuntime` instead of maintaining second copies of the site state.
 
 ## Lifecycle {#lifecycle}
 
-The pseudo-instance lifecycle stays fixed at five steps:
+The pseudo-instance lifecycle is five steps, in order:
 
 1. Formal survey writes `DiscoveredSiteRecord` and returns `SiteRef`.
 2. Activation hands `SiteRef` to `ActivationService`, which validates ownership and site conditions.
@@ -107,9 +105,9 @@ The pseudo-instance lifecycle stays fixed at five steps:
 4. Runtime services advance pressure, objectives, and feedback inside the coverage area until completion, retreat, or collapse.
 5. `RecoveryService` resolves results, writes back to the ledger, unregisters runtime state, and clears local indexes.
 
-When the runtime ends, we delete the runtime registration, not the ruin truth. Whether the ruin is completed, invalidated, or available again is still a ledger decision.
+When the runtime ends, the runtime registration is deleted, not the ruin record. Whether the ruin is completed, invalidated, or available again is a ledger decision.
 
-## Out Of Scope {#out-of-scope}
+## Out of scope {#out-of-scope}
 
 Version one explicitly excludes:
 
@@ -119,9 +117,11 @@ Version one explicitly excludes:
 - letting chunk events rewrite the formal ledger,
 - mixing early discovery nodes into the formal site lifecycle.
 
-## Acceptance Criteria {#acceptance-criteria}
+## Acceptance criteria {#acceptance-criteria}
 
-- We can start one formal field event on an existing host structure without teleporting into a new dimension.
-- Activation, runtime, and recovery stay anchored to the same `SiteRef` and `SiteCoordinate`.
-- Coverage, sync, and cache cleanup are supported by chunk-side indexes instead of repeated world scans.
-- When the event ends, runtime state is removed and the ledger record remains.
+Version one is done when:
+
+- one formal field event can start on an existing host structure without teleporting into a new dimension,
+- activation, runtime, and recovery stay anchored to the same `SiteRef` and `SiteCoordinate`,
+- coverage, sync, and cache cleanup are supported by chunk-side indexes instead of repeated world scans,
+- when the event ends, runtime state is removed and the ledger record remains.

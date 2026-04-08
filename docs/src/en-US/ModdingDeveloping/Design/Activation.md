@@ -6,7 +6,7 @@ priority: 20
 
 # Activation {#activation}
 
-The primary object of activation is no longer "what the player right-clicked." It is `ActivationService`. Input is the `SiteRef` produced by formal survey. Output is `ActiveSiteRuntime` registered into the runtime registry.
+The subject of activation is not "what the player right-clicked." It is `ActivationService`. Input is the `SiteRef` produced by formal survey. Output is `ActiveSiteRuntime` registered into the runtime registry.
 
 ```mermaid
 flowchart LR
@@ -19,16 +19,16 @@ flowchart LR
     Registry --> Clear["Clear pending reference"]
 ```
 
-## What The Activation Layer Solves {#what-the-activation-layer-solves}
+## What the activation layer solves {#what-the-activation-layer-solves}
 
 | Question | Answered by |
 | --- | --- |
 | which exact ruin this submit points at | `SiteRef` + world ledger |
-| which interaction surface this submit came from | `ActivationContext` + `ActivationSource` |
+| which interaction entry point this submit came from | `ActivationContext` + `ActivationSource` |
 | whether the site may enter runtime now | `ActivationService` |
 | how runtime state is created and registered | `SiteRuntimeBridge` + `SiteRuntimeRegistry` |
 
-## Activation Input Must Be An Instance Reference {#activation-input-must-be-instance-reference}
+## Activation input must be an instance reference {#activation-input-must-be-instance-reference}
 
 If activation receives only a type id such as `lost_civilization:contaminated_ruin`, it cannot answer:
 
@@ -38,7 +38,7 @@ If activation receives only a type id such as `lost_civilization:contaminated_ru
 
 Activation therefore consumes `SiteRef`, not a type name.
 
-## Core Objects {#core-object}
+## Core objects {#core-object}
 
 ```java
 public record ActivationContext(
@@ -63,15 +63,15 @@ public record ActivationResult(
 ) {}
 ```
 
-The important part here is responsibility:
+What matters is the responsibility split:
 
 - `ActivationContext` carries the full submit context,
 - `ActivationSource` only says which interaction family produced the submit,
 - `ActivationResult` keeps success and rejection reason inside one result object.
 
-## Adapter Layer {#adapter-layer}
+## Adapter layer {#adapter-layer}
 
-The adapter layer folds different interaction surfaces into one unified context. It is not the activation logic itself.
+The adapter layer folds different interaction entry points into one unified context. It is not the activation logic itself.
 
 | Adapter | Role |
 | --- | --- |
@@ -80,9 +80,9 @@ The adapter layer folds different interaction surfaces into one unified context.
 | machine adapter | handles later machine activation or machine archaeology |
 | scripted adapter | handles special scripted or event-driven entry points |
 
-`RightClickBlock` and `RightClickItem` are only adapter entry points now. They are not the whole activation architecture.
+`RightClickBlock` and `RightClickItem` are adapter entry points. They are not the whole activation architecture.
 
-## Minimum Activation Flow {#minimum-activation-flow}
+## Minimum activation flow {#minimum-activation-flow}
 
 1. The adapter builds `ActivationContext`.
 2. `ActivationService` loads `DiscoveredSiteRecord` from the ledger.
@@ -90,7 +90,7 @@ The adapter layer folds different interaction surfaces into one unified context.
 4. On success, `SiteRuntimeBridge` creates and hands off `ActiveSiteRuntime`.
 5. `SiteRuntimeRegistry` takes ownership and clears the pending reference.
 
-## State And Cleanup {#state-and-cleanup}
+## State and cleanup {#state-and-cleanup}
 
 | Situation | Handling |
 | --- | --- |
@@ -100,18 +100,18 @@ The adapter layer folds different interaction surfaces into one unified context.
 | reference was recovered or aborted already | reject activation and clear the pending reference |
 | player changes dimension or the site level unloads | run runtime teardown; do not leave live state on the player |
 
-## Design-To-Code Mapping {#design-to-code-mapping}
+## Design-to-code mapping {#design-to-code-mapping}
 
 | Design decision | Object |
 | --- | --- |
-| unify different submit surfaces | `ActivationAdapter` |
+| unify different submit entry points | `ActivationAdapter` |
 | activation logic lives in a service layer | `ActivationService` |
 | activation input must carry an instance reference | `ActivationContext` |
 | runtime open and runtime registration stay separate | `SiteRuntimeBridge`, `SiteRuntimeRegistry` |
 | revalidate ledger state before open | `SiteLedgerSavedData` |
 | player leave and level unload are teardown hooks only | `PlayerEvent.PlayerChangedDimensionEvent`, `LevelEvent.Unload` |
 
-## Prohibited Items {#prohibited-items}
+## Prohibited items {#prohibited-items}
 
 1. making activation re-run survey logic,
 2. treating `RightClickBlock` or `RightClickItem` as the whole activation architecture,

@@ -29,11 +29,11 @@ hero:
             position: "0%"
           - color:
               light: "rgba(180, 133, 70, 0.82)"
-              dark: "rgba(31, 73, 91, 0.88)"
+              dark: "rgba(52, 32, 12, 0.94)"
             position: "42%"
           - color:
               light: "rgba(49, 76, 91, 0.96)"
-              dark: "rgba(10, 15, 23, 0.99)"
+              dark: "rgba(9, 5, 2, 0.99)"
             position: "100%"
     readability:
       mode: auto
@@ -94,15 +94,11 @@ features:
     details: Responsibility split across docs, pack content, and the future Java runtime source tree.
     link: /en-US/Developing/Architecture
     linkText: Open Architecture
-  - title: Delivery Order
-    details: Version-one budgeting, vertical-slice order, and which expansion work stays later.
-    link: /en-US/Developing/Workflow
-    linkText: Open Workflow
 ---
 
 ## Current Scope {#current-scope}
 
-- The first formal vertical slice stays fixed at `early discovery -> formal survey -> activation -> runtime -> resonance -> recovery`. Formal instances, runtime state, and recovery results live in different authority layers instead of collapsing into player data, chunk caches, or tooltips.
+- The first formal vertical slice is `early discovery -> formal survey -> activation -> runtime -> resonance -> recovery`. Formal instances, runtime state, and recovery results live in different state groups instead of collapsing into player data, chunk caches, or tooltips.
 - `ModdingDeveloping` covers Forge-side Java runtime only. Scripts, configs, datapacks, and mod assembly belong in `Modpacking` and `Developing`.
-- Early archaeology stays centered on environmental nodes, brush reveal, extraction, exhaustion, and anti-automation rules. Formal ruins enter the ledger only after formal survey.
-- TaCZ remains the shared firearm base. Civilization difference comes through early signals, activation rules, site pressure, resonance results, and recovery results.
+- Early archaeology stays centered on environmental nodes, brush reveal, extraction, exhaustion, and anti-automation rules. Formal ruins are only recorded after formal survey.
+- The project keeps using TaCZ as its gun system. Civilization difference comes through early signals, activation rules, site pressure, resonance results, and recovery results.

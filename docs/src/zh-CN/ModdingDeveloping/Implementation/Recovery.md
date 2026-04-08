@@ -6,7 +6,7 @@ priority: 50
 
 # 回收实现 {#recovery-implementation}
 
-回收实现把运行态结果折叠成长期可读的数据。这里必须分开三件事：玩家长期知识、遗物快照、客户端 tooltip。
+回收把运行态结果折叠成长期可读的数据，必须分开三件事：玩家长期知识、遗物快照、客户端 tooltip。三者不能合并，也不能互相代理。
 
 ```mermaid
 flowchart LR
@@ -37,19 +37,19 @@ flowchart LR
 
 ## 物品快照写入边界 {#item-snapshot-write-boundary}
 
-遗物快照建议放在 `ItemStack` 的单一根 tag 下，而不是把字段散到顶层。
+遗物快照建议放在 `ItemStack` 的单一根 tag 下，字段不散到顶层。
 
 ```java
 public static final String RELIC_RESULT_KEY = "lost_civilization.recovered_relic";
 ```
 
-对应写入流程应固定为：
+写入流程如下：
 
 1. 读取 `stack.getOrCreateTag()`。
 2. 在单一根 key 下写入 `RecoveredRelicSnapshot` 对应字段。
 3. 不覆盖与遗物结果无关的其他物品 tag。
 
-这样做的原因是避免和附魔、显示名、模组附加字段互相踩写。
+这样可以避免和附魔、显示名、模组附加字段互相踩写。
 
 ## `RecoveredRelicSnapshot` 建议结构 {#recovered-relic-snapshot-structure}
 
@@ -81,11 +81,11 @@ public final class RecoveredRelicSnapshotCodec {
 }
 ```
 
-这里的关键不是字段名本身，而是编码入口必须只有一处。否则 tooltip、回收和调试命令很快就会各写一份格式。
+关键不是字段名本身，而是编码入口必须只有一处。多处各写一份，tooltip、回收和调试命令很快就会格式分叉。
 
 ## 玩家长期知识迁移 {#player-long-term-knowledge-migration}
 
-如果 `lc_identification_level` 挂在玩家实体数据上，至少要有下面这条订阅：
+`lc_identification_level` 挂在玩家实体数据上时，至少要有下面这条订阅：
 
 ```java
 @SubscribeEvent
@@ -98,7 +98,7 @@ public static void onPlayerClone(PlayerEvent.Clone event) {
 }
 ```
 
-这里只复制长期知识，不复制待处理短标记和 live runtime。
+这里只复制长期知识，不复制待处理短标记和 live runtime 的任何内容。
 
 ## tooltip 读取规则 {#tooltip-read-rules}
 
@@ -114,7 +114,7 @@ public static void onTooltip(ItemTooltipEvent event) {
 }
 ```
 
-推荐的读取原则如下：
+读取原则：
 
 1. 先尝试 `event.getItemStack().getTag()`。
 2. tag 不存在时直接走最低限度显示，不抛异常。
@@ -126,7 +126,7 @@ public static void onTooltip(ItemTooltipEvent event) {
 | --- | --- |
 | 根据快照和知识值格式化文本 | 重算共鸣 |
 | 在空玩家路径下优雅降级 | 访问运行态 registry |
-| 输出稳定文本行 | 查询世界账本决定结果 |
+| 输出稳定文本行 | 查询存档持久化数据决定结果 |
 
 ## 最低测试要求 {#minimum-test-requirements}
 

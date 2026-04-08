@@ -4,9 +4,9 @@ description: Forge-side implementation contract for site runtime, including the 
 priority: 30
 ---
 
-# Site Runtime Implementation {#site-runtime-implementation}
+# Site runtime implementation {#site-runtime-implementation}
 
-The critical question for site runtime is not whether we have tick hooks. It is where each class of data belongs. The recommended model is three persistence layers plus one live-state layer.
+The real question for site runtime is not whether tick hooks exist. It is where each class of data belongs. The recommended model is three persistence layers plus one live-state layer.
 
 ```mermaid
 flowchart LR
@@ -16,7 +16,7 @@ flowchart LR
     Sync --> Client["Client presentation"]
 ```
 
-## Verified Persistence And Lifecycle API {#verified-persistence-and-lifecycle-api}
+## Verified persistence and lifecycle API {#verified-persistence-and-lifecycle-api}
 
 | Topic | Verified API or event | Implementation conclusion |
 | --- | --- | --- |
@@ -30,16 +30,16 @@ flowchart LR
 | chunk capability | `AttachCapabilitiesEvent<T>`, `IForgeLevelChunk extends ICapabilityProvider` | alternate route for chunk-local state |
 | player watching | `ChunkWatchEvent.Watch` / `UnWatch` | send auxiliary chunk data to specific players |
 
-## Four Implementation Layers {#four-layer-implementation-split}
+## Four implementation layers {#four-layer-implementation-split}
 
 | Layer | Recommended implementation | Stores |
 | --- | --- | --- |
-| world truth | `SiteLedgerSavedData` | ruin instances, anchors, lifecycle, covered chunks |
+| level-saved records | `SiteLedgerSavedData` | ruin instances, anchors, lifecycle, covered chunks |
 | live state | `SiteRuntimeRegistry` + `ActiveSiteRuntime` | current pressure, phase, temporary events, owner |
 | chunk-side auxiliary layer | `ChunkDataEvent` or chunk capability | local presentation, cache, light indexes |
 | sync layer | `ChunkWatchEvent.Watch` / `UnWatch` | minimal chunk payloads for the client |
 
-## `SiteLedgerSavedData` Skeleton {#site-ledger-saved-data-skeleton}
+## `SiteLedgerSavedData` skeleton {#site-ledger-saved-data-skeleton}
 
 ```java
 public final class SiteLedgerSavedData extends SavedData {
@@ -65,13 +65,9 @@ public final class SiteLedgerSavedData extends SavedData {
 }
 ```
 
-The important part is not the exact field set:
+The field names aren't what matter here. What matters: the world ledger uses `SavedData`, mutations call `setDirty()` immediately, and real disk writes happen during world save.
 
-- the world ledger uses `SavedData`,
-- mutations call `setDirty()` immediately,
-- real disk writes happen during world save.
-
-## `LevelEvent.Save` Responsibilities {#level-event-save-responsibilities}
+## `LevelEvent.Save` responsibilities {#level-event-save-responsibilities}
 
 `LevelEvent.Save` fires on the server side only. Good uses:
 
@@ -81,7 +77,7 @@ The important part is not the exact field set:
 
 It should not become the per-tick runtime loop.
 
-## Two Paths For Chunk-Side Data {#two-paths-for-chunk-side-data}
+## Two paths for chunk-side data {#two-paths-for-chunk-side-data}
 
 ### Path A: `ChunkDataEvent.Load` / `ChunkDataEvent.Save` {#route-a-chunk-data-event-load-save}
 
@@ -103,18 +99,18 @@ Suitable for:
 - local state objects tied to `LevelChunk`,
 - cache objects that should release uniformly when the chunk invalidates.
 
-This path is useful for richer local state, but it is still not world truth.
+This path is useful for richer local state, but it is still not a replacement for level-saved records.
 
-## `ChunkEvent.Load` And `ChunkEvent.Unload` {#chunk-event-load-and-unload}
+## `ChunkEvent.Load` and `ChunkEvent.Unload` {#chunk-event-load-and-unload}
 
-| Event | Good use | Must not do |
+| Event | Good use | Avoid |
 | --- | --- | --- |
-| `ChunkEvent.Load` | refill lightweight cache, prepare local sync | create runtime, perform heavy interaction, query across chunks |
-| `ChunkEvent.Unload` | release local cache, drop weak references | delete world-ledger records |
+| `ChunkEvent.Load` | refill lightweight cache, prepare local sync | creating runtime, performing heavy interaction, querying across chunks |
+| `ChunkEvent.Unload` | release local cache, drop weak references | deleting world-ledger records |
 
 `ChunkEvent.Load` may fire before `LevelChunk` reaches `ChunkStatus.FULL`. It is not a site-runtime entry point.
 
-## Coverage Chunk Algorithm Recommendation {#coverage-chunk-algorithm-recommendation}
+## Coverage chunk algorithm recommendation {#coverage-chunk-algorithm-recommendation}
 
 For each `DiscoveredSiteRecord`, store `coveredChunkKeys` in the ledger. Recommended initialization:
 
@@ -123,7 +119,7 @@ For each `DiscoveredSiteRecord`, store `coveredChunkKeys` in the ledger. Recomme
 3. precompute the covered chunk set,
 4. let chunk events and watch events work only on that key set.
 
-That gives us stable handling for:
+That gives stable handling for:
 
 - sync when a player enters visible range,
 - local cache release when a chunk unloads,
@@ -131,27 +127,25 @@ That gives us stable handling for:
 
 ## `ChunkWatchEvent.Watch` / `UnWatch` {#chunk-watch-event-watch-unwatch}
 
-These events are best for "a player starts seeing this chunk, now send the extra ruin data."
+These events handle "a player starts seeing this chunk, now send the extra ruin data." They solve sync, not persistence.
 
 | Event | Recommended use |
 | --- | --- |
 | `ChunkWatchEvent.Watch` | send local ruin state or coverage markers for that chunk to the player |
 | `ChunkWatchEvent.UnWatch` | tear down client cache or subscription state for that player |
 
-They solve sync, not persistence.
-
-## Recommended Object Boundaries {#current-recommended-object-boundaries}
+## Recommended object boundaries {#current-recommended-object-boundaries}
 
 | Object | Responsibility |
 | --- | --- |
-| `SiteLedgerSavedData` | world truth |
+| `SiteLedgerSavedData` | level-saved records |
 | `SiteRuntimeRegistry` | currently active site events |
 | `ActiveSiteRuntime` | one ruin's dynamic runtime state |
 | `ChunkSiteAuxData` | one chunk's auxiliary cache |
 | `SiteSyncPayload` | minimum extra data sent to the client |
 
-## Implementation Errors To Avoid {#implementation-errors-to-avoid}
+## Errors to avoid {#implementation-errors-to-avoid}
 
-1. treating `ChunkDataEvent.Load` as a safe main-thread entry,
-2. treating `ChunkEvent.Unload` as authority to delete ruin instances,
-3. mutating `SavedData` without calling `setDirty()`.
+1. Treating `ChunkDataEvent.Load` as a safe main-thread entry point.
+2. Treating `ChunkEvent.Unload` as authority to delete ruin instances.
+3. Mutating `SavedData` without calling `setDirty()`.

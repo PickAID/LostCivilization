@@ -6,7 +6,7 @@ priority: 30
 
 # Repositories {#repositories}
 
-Three live repositories do not exist yet. Right now there is only one integration workspace, the Prism instance directory itself. The docs should reflect that fact instead of writing from an idealized future layout.
+Three live repositories do not exist yet. Right now there is only one integration workspace: the Prism instance directory itself. The docs should reflect that fact rather than writing from an idealized future layout.
 
 ```mermaid
 flowchart LR
@@ -16,7 +16,7 @@ flowchart LR
     Workspace --> Future["Future Java runtime source tree"]
 ```
 
-## Current Facts {#current-facts}
+## Current facts {#current-facts}
 
 | Fact | Meaning |
 | --- | --- |
@@ -24,19 +24,19 @@ flowchart LR
 | `docs/` and pack content coexist | docs and integration content live in the same workspace today |
 | the Java runtime has no separate source tree yet | runtime objects are still being defined in docs first |
 
-## Current Management Model {#current-management}
+## Current management model {#current-management}
 
-| Work surface | Current home | Current rule |
+| Content area | Current home | Current rule |
 | --- | --- | --- |
-| docs layer | `docs/` | maintained as long-term project truth |
+| docs layer | `docs/` | maintained as the long-term documentation source |
 | pack layer | `mods/`, `config/`, `kubejs/`, `tacz/`, and similar paths | describe only what really exists in this instance |
 | Java runtime | future standalone source tree | for now, define objects and contracts under `ModdingDeveloping` |
 
-These three surfaces share one workspace today, but they do not share the same fact model.
+These three areas share one workspace today, but they do not share the same fact model.
 
-## When It Becomes Worth Splitting {#when-to-split}
+## When it becomes worth splitting {#when-to-split}
 
-If the project splits later, repo names are not the first step. Stable ownership is.
+If the project splits later, stable ownership comes before repo names.
 
 | Split target | Trigger | What it should own after the split |
 | --- | --- | --- |
@@ -44,13 +44,13 @@ If the project splits later, repo names are not the first step. Stable ownership
 | pack repo | pack needs independent packaging, distribution, and regression testing | mod list, config, KubeJS, datapacks, resource overrides |
 | Java mod repo | runtime classes, tests, and release cadence stabilize | `src/main/java`, `src/main/resources`, tests |
 
-## Things We Must Not Freeze Early {#things-not-to-freeze-early}
+## Things we must not freeze early {#things-not-to-freeze-early}
 
 1. Do not start by naming three repos and forcing the docs to fit them.
 2. Do not write a future Java source tree as if it were a current directory fact.
 3. Do not make `ModdingDeveloping` explain the current `kubejs/` directory.
 
-## Decision Rules {#decision-rules}
+## Decision rules {#decision-rules}
 
 | Question | Check first |
 | --- | --- |

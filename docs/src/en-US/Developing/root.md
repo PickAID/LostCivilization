@@ -2,5 +2,5 @@
 root: true
 collapsed: false
 title: Developing
-description: Root configuration for the general development working surface.
+description: Project structure, current workspace, and directory split.
 ---

@@ -26,17 +26,11 @@ flowchart LR
 | 遗物快照层 | `siteRef`、`siteTypeId`、`ResonanceState`、`patternKey` |
 | 记录系统层 | 用于图鉴、历史回看和统计的长期记录 |
 
-这三层的关系是：
-
-- 玩家长期层回答“我们学会了什么”；
-- 遗物快照层回答“这件东西带着什么结果离场”；
-- 记录系统层回答“这次行动在长期档案里留下了什么”。
-
-三者互相引用，但不能互相替代。
+三层各有分工：玩家长期层回答"我们学会了什么"，遗物快照层回答"这件东西带着什么结果离场"，记录系统层回答"这次行动在长期档案里留下了什么"。三者互相引用，但不能互相替代。
 
 ## 玩家长期层的设计规则 {#player-long-term-layer-rules}
 
-如果知识值保存在玩家实体数据里，重生时必须通过 `PlayerEvent.Clone` 从旧玩家复制到新玩家。否则“跨世界保存”和“跨死亡复制”会被混成一件事。
+如果知识值保存在玩家实体数据里，重生时必须通过 `PlayerEvent.Clone` 从旧玩家复制到新玩家。否则"跨世界保存"和"跨死亡复制"会被混成一件事。
 
 ## 物品快照层的设计规则 {#item-snapshot-layer-rules}
 
@@ -50,7 +44,7 @@ flowchart LR
 
 ## tooltip 的设计规则 {#tooltip-design-rules}
 
-`ItemTooltipEvent` 允许在没有玩家对象时构建 tooltip。因此 tooltip 只能依赖：
+`ItemTooltipEvent` 允许在没有玩家对象时构建 tooltip，所以 tooltip 只能依赖：
 
 - `ItemStack` 上已经保存的快照；
 - 可选的玩家长期知识；
@@ -58,7 +52,7 @@ flowchart LR
 
 tooltip 不能依赖 live runtime。
 
-tooltip 的读取顺序也应该固定：
+读取顺序也应该固定：
 
 1. 先读 `ItemStack` 上的已保存快照。
 2. 再读可选的玩家长期知识。
@@ -77,7 +71,7 @@ public record RecoveredRelicSnapshot(
 ) {}
 ```
 
-这个对象只保留离场结果，不回写现场细节。诸如当前稳定度、守卫数、覆盖区块和 tick 级中间状态，都不属于遗物快照。
+这个对象只保留离场结果，不回写现场细节。当前稳定度、守卫数、覆盖区块和 tick 级中间状态，都不属于遗物快照。
 
 ## 禁止项 {#prohibited-items}
 
