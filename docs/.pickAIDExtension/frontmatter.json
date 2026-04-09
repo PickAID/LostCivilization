@@ -212,6 +212,25 @@
       "description": "Supported mod loaders for a mod page"
     },
     {
+      "key": "metadata.side",
+      "category": "meta",
+      "type": "enum",
+      "values": [
+        "both",
+        "client",
+        "server"
+      ],
+      "default": "both",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "side: ${1|both,client,server|}",
+      "description": "Runtime side requirement for the mod page"
+    },
+    {
       "key": "metadata.sources",
       "category": "meta",
       "type": "object",
