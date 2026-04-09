@@ -1,0 +1,294 @@
+{
+  "disabledKeys": [
+    "metadata"
+  ],
+  "fields": [
+    {
+      "key": "metadata",
+      "category": "meta",
+      "type": "object",
+      "parentOnly": true,
+      "snippet": "metadata:\n  mode: ${1|doc,kubejs,modding,mod|}",
+      "description": "Structured article metadata block for doc, KubeJS, modding, and mod pages"
+    },
+    {
+      "key": "metadata.mode",
+      "category": "meta",
+      "type": "enum",
+      "values": [
+        "doc",
+        "kubejs",
+        "modding",
+        "mod"
+      ],
+      "default": "doc",
+      "snippet": "mode: ${1|doc,kubejs,modding,mod|}",
+      "description": "Metadata presentation mode"
+    },
+    {
+      "key": "metadata.metrics",
+      "category": "meta",
+      "type": "object",
+      "parentOnly": true,
+      "snippet": "metrics:\n  update: ${1|true,false|}\n  wordCount: ${2|true,false|}\n  readTime: ${3|true,false|}\n  pageViews: ${4|true,false|}",
+      "description": "Metric visibility overrides for the metadata row"
+    },
+    {
+      "key": "metadata.metrics.update",
+      "category": "meta",
+      "type": "boolean",
+      "default": true,
+      "snippet": "update: ${1|true,false|}",
+      "description": "Show the last updated metric"
+    },
+    {
+      "key": "metadata.metrics.wordCount",
+      "category": "meta",
+      "type": "boolean",
+      "default": true,
+      "snippet": "wordCount: ${1|true,false|}",
+      "description": "Show the word count metric"
+    },
+    {
+      "key": "metadata.metrics.readTime",
+      "category": "meta",
+      "type": "boolean",
+      "default": true,
+      "snippet": "readTime: ${1|true,false|}",
+      "description": "Show the estimated reading time metric"
+    },
+    {
+      "key": "metadata.metrics.pageViews",
+      "category": "meta",
+      "type": "boolean",
+      "default": true,
+      "snippet": "pageViews: ${1|true,false|}",
+      "description": "Show the page views metric"
+    },
+    {
+      "key": "metadata.current",
+      "category": "meta",
+      "type": "object",
+      "parentOnly": true,
+      "snippet": "current:\n  label: ${1:1.20.1}\n  value: ${2:KubeJS 2001.6.5-build.7}",
+      "description": "Current version block used by KubeJS and modding pages"
+    },
+    {
+      "key": "metadata.current.label",
+      "category": "meta",
+      "type": "string",
+      "snippet": "label: ${1:1.20.1}",
+      "description": "Compact label shown on the metadata rail"
+    },
+    {
+      "key": "metadata.current.value",
+      "category": "meta",
+      "type": "string",
+      "snippet": "value: ${1:KubeJS 2001.6.5-build.7}",
+      "description": "Detailed version text shown in hover"
+    },
+    {
+      "key": "metadata.requiredMods",
+      "category": "meta",
+      "type": "array",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "kubejs"
+        }
+      ],
+      "snippet": "requiredMods:\n  - name: ${1:ProbeJS}\n    version: ${2:6.0.1}",
+      "description": "Required mod list for KubeJS pages"
+    },
+    {
+      "key": "metadata.requiredMods.name",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "kubejs"
+        }
+      ],
+      "snippet": "name: ${1:ProbeJS}",
+      "description": "Required mod name"
+    },
+    {
+      "key": "metadata.requiredMods.version",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "kubejs"
+        }
+      ],
+      "snippet": "version: ${1:6.0.1}",
+      "description": "Required mod version"
+    },
+    {
+      "key": "metadata.routes",
+      "category": "meta",
+      "type": "array",
+      "snippet": "routes:\n  - ${1:server_scripts}\n  - ${2:startup_scripts}",
+      "description": "Route tags such as server_scripts, client_scripts, registry, datagen, or mixin"
+    },
+    {
+      "key": "metadata.stack",
+      "category": "meta",
+      "type": "array",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "modding"
+        }
+      ],
+      "snippet": "stack:\n  - name: ${1:NeoGradle}\n    version: ${2:userdev 7.0.124}",
+      "description": "Toolchain or dependency stack used by a modding page"
+    },
+    {
+      "key": "metadata.stack.name",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "modding"
+        }
+      ],
+      "snippet": "name: ${1:NeoGradle}",
+      "description": "Toolchain entry name"
+    },
+    {
+      "key": "metadata.stack.version",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "modding"
+        }
+      ],
+      "snippet": "version: ${1:userdev 7.0.124}",
+      "description": "Toolchain entry version"
+    },
+    {
+      "key": "metadata.latest",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "latest: ${1:1.21.x}",
+      "description": "Latest maintained version shown inline on mod pages"
+    },
+    {
+      "key": "metadata.supported",
+      "category": "meta",
+      "type": "array",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "supported:\n  - ${1:1.21.x}\n  - ${2:1.20.1}\n  - ${3:1.19.2}",
+      "description": "Supported version list shown in hover on mod pages"
+    },
+    {
+      "key": "metadata.loaders",
+      "category": "meta",
+      "type": "array",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "loaders:\n  - ${1:Forge}\n  - ${2:NeoForge}",
+      "description": "Supported mod loaders for a mod page"
+    },
+    {
+      "key": "metadata.sources",
+      "category": "meta",
+      "type": "object",
+      "parentOnly": true,
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "sources:\n  curseforge: ${1:https://www.curseforge.com/minecraft/mc-mods/example}\n  modrinth: ${2:https://modrinth.com/mod/example}",
+      "description": "Third-party source links rendered on mod pages"
+    },
+    {
+      "key": "metadata.sources.curseforge",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "curseforge: ${1:https://www.curseforge.com/minecraft/mc-mods/example}",
+      "description": "CurseForge project link"
+    },
+    {
+      "key": "metadata.sources.modrinth",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "modrinth: ${1:https://modrinth.com/mod/example}",
+      "description": "Modrinth project link"
+    },
+    {
+      "key": "metadata.sources.mcmod",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "mcmod: ${1:https://www.mcmod.cn/class/example.html}",
+      "description": "MC百科 project link"
+    },
+    {
+      "key": "metadata.sources.docs",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "docs: ${1:https://docs.example.com}",
+      "description": "Official documentation link"
+    },
+    {
+      "key": "metadata.sources.github",
+      "category": "meta",
+      "type": "string",
+      "when": [
+        {
+          "key": "metadata.mode",
+          "equals": "mod"
+        }
+      ],
+      "snippet": "github: ${1:https://github.com/owner/repo}",
+      "description": "GitHub repository link"
+    }
+  ]
+}
