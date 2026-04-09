@@ -14,6 +14,15 @@ import { SyncEngine } from './SyncEngine';
 import { JsonItemSorter } from './JsonItemSorter';
 import { PathKeyProcessor } from './PathKeyProcessor';
 
+export function isFlattenedRootWrapper(items: SidebarItem[]): boolean {
+    return (
+        items.length === 1 &&
+        items[0]?._isRoot === true &&
+        Array.isArray(items[0].items) &&
+        items[0].items.length > 0
+    );
+}
+
 /**
  * @class RecursiveSynchronizer
  * @description Handles recursive synchronization of sidebar items with JSON overrides.
@@ -75,7 +84,8 @@ export class RecursiveSynchronizer {
             return;
         }
 
-        const isFlattenedRootStructure = isTopLevelCall && items.length === 1 && items[0]._isRoot && items[0].items && items[0].items.length > 0;
+        const isFlattenedRootStructure =
+            isTopLevelCall && isFlattenedRootWrapper(items);
 
         if (isFlattenedRootStructure) {
             const rootItem = items[0];
@@ -189,12 +199,15 @@ export class RecursiveSynchronizer {
         for (const item of items) {
             const itemKey = this.pathProcessor.extractRelativeKeyForCurrentDir(item, rootConfigDirSignature);
             
-            if (item._isRoot && items.length === 1) {
+            if (isFlattenedRootWrapper(items)) {
                 if (localesData.hasOwnProperty('_self_')) {
                     item.text = localesData['_self_'];
                 }
                 if (collapsedData.hasOwnProperty('_self_')) {
                     item.collapsed = collapsedData['_self_'];
+                }
+                if (hiddenData.hasOwnProperty('_self_')) {
+                    item._hidden = hiddenData['_self_'] === true;
                 }
                 
                 if (item.items && item.items.length > 0) {
@@ -221,8 +234,6 @@ export class RecursiveSynchronizer {
                     const hiddenValue = hiddenData[itemKey];
                     (item as any)._hidden = hiddenValue === true ? true : false;
                     parentOverrideApplied.hidden = true;
-                } else {
-                    (item as any)._hidden = false;
                 }
                 
                 if (item._isDirectory && item.items && item.items.length > 0) {
@@ -245,6 +256,13 @@ export class RecursiveSynchronizer {
                             item.collapsed = itemCollapsedData['_self_'];
                             }
                         }
+
+                        if (!parentOverrideApplied.hidden) {
+                        const itemHiddenData = await this.jsonFileHandler.readJsonFile('hidden', lang, nextConfigDirSignature);
+                        if (itemHiddenData.hasOwnProperty('_self_')) {
+                            (item as any)._hidden = itemHiddenData['_self_'] === true;
+                            }
+                        }
                         
                             await this.reapplyMigratedValues(item.items, nextConfigDirSignature, lang, langGitbookPaths);
                             
@@ -255,13 +273,13 @@ export class RecursiveSynchronizer {
             }
         }
         
-        if (items.length > 0 && !(items.length === 1 && items[0]._isRoot)) {
+        if (items.length > 0 && !isFlattenedRootWrapper(items)) {
             const sortedItems = this.jsonItemSorter.sortItems(items, orderData);
             items.length = 0;
             items.push(...sortedItems);
         }
 
-        const isFlattened = items.length === 1 && items[0]._isRoot;
+        const isFlattened = isFlattenedRootWrapper(items);
         if (isFlattened && items[0].items) {
             await this.filterHiddenItems(items[0].items, rootConfigDirSignature, lang, true);
         } else {
@@ -294,10 +312,8 @@ export class RecursiveSynchronizer {
             const item = items[i];
                 const itemKey = this.pathProcessor.extractRelativeKeyForCurrentDir(item, currentConfigDirSignature);
 
-            if (hiddenData[itemKey] === true) {
-                (item as any)._hidden = true;
-            } else {
-                (item as any)._hidden = false;
+            if (Object.prototype.hasOwnProperty.call(hiddenData, itemKey)) {
+                (item as any)._hidden = hiddenData[itemKey] === true;
             }
             
             if (item.items && item.items.length > 0) {
@@ -466,7 +482,7 @@ export class RecursiveSynchronizer {
             } else if (type === 'collapsed') {
                 defaultSelfValue = currentItem.collapsed ?? true;
             } else if (type === 'hidden') {
-                defaultSelfValue = false;
+                defaultSelfValue = currentItem._hidden === true;
             }
 
             if (defaultSelfValue !== undefined) {
@@ -812,4 +828,3 @@ ${dirName}_removed_${timestamp}/
         }
     }
 } 
-

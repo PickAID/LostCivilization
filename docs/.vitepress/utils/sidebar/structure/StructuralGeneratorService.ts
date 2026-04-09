@@ -21,7 +21,11 @@ import { ItemProcessorFunction, RecursiveViewGeneratorFunction } from './groupPr
 import { processItem } from './itemProcessor';
 import { sortItems } from './itemSorter';
 import {
-    isSidebarConfigFileName,
+    joinSidebarBaseRelativePath,
+    resolveChildViewTransition,
+} from "./viewControl";
+import {
+    isSidebarItemExcludedFileName,
     resolveSidebarConfigFilePath,
 } from "../shared/sidebarFileConventions";
 
@@ -269,7 +273,7 @@ export class StructuralGeneratorService {
             }
 
             if (entry.isFile()) {
-                if (isSidebarConfigFileName(entry.name)) {
+                if (isSidebarItemExcludedFileName(entry.name)) {
                     continue;
                 }
 
@@ -301,28 +305,15 @@ export class StructuralGeneratorService {
                     lang,
                     isDevMode
                 );
-
-                if (dirEffectiveConfig.root && currentDepth > 0) {
-                    const rootLinkItem = await processItem(
-                        entry.name,
-                        itemAbsPath,
-                        true, // isDir
-                        parentConfig,
-                        lang,
-                        currentDepth,
-                        isDevMode,
-                        this.configReader,
-                        this.fs,
-                        this.generateSidebarView.bind(this) as RecursiveViewGeneratorFunction,
-                        this.globalGitBookExclusionList,
-                        this.docsPath
-                    );
-
-                    if (rootLinkItem) {
-                        flattenedItems.push(rootLinkItem);
-                    }
-                    continue;
-                }
+                const dirRelativeKey = baseRelativePathKey
+                    ? `${baseRelativePathKey}${entry.name}/`
+                    : `${entry.name}/`;
+                const childViewTransition = resolveChildViewTransition(
+                    parentConfig,
+                    dirEffectiveConfig,
+                    dirRelativeKey,
+                    currentDepth
+                );
 
                 // Get subdirectory entries to check content
                     let subEntries: { name: string; path: string; isDirectory(): boolean; isFile(): boolean; }[] = [];
@@ -344,7 +335,7 @@ export class StructuralGeneratorService {
                         if (
                             subEntry.isFile() &&
                             subEntry.name.toLowerCase().endsWith(".md") &&
-                            !isSidebarConfigFileName(subEntry.name)
+                            !isSidebarItemExcludedFileName(subEntry.name)
                         ) {
                             hasMarkdownFiles = true;
                         }
@@ -360,39 +351,38 @@ export class StructuralGeneratorService {
                     }
 
                 // For file-only directories (like flandre/), always create a directory item
-                // This ensures RecursiveSynchronizer can generate JSON configs for them
                 if (hasMarkdownFiles && !hasSubdirectories) {
-                    
-                    // Process all markdown files in this directory
-                    const dirRelativeKey = baseRelativePathKey ? `${baseRelativePathKey}${entry.name}/` : `${entry.name}/`;
-                    const dirConfigForFiles = {
-                        ...dirEffectiveConfig,
-                        _baseRelativePathForChildren: dirRelativeKey
-                    };
-
                     const fileItems: SidebarItem[] = [];
-                    for (const subEntry of subEntries) {
-                        if (
-                            subEntry.isFile() &&
-                            subEntry.name.toLowerCase().endsWith(".md") &&
-                            !isSidebarConfigFileName(subEntry.name)
-                        ) {
-                            const fileItem = await processItem(
-                                subEntry.name,
-                                subEntry.path,
-                                false, // isDir
-                                dirConfigForFiles,
-                                lang,
-                                currentDepth + 1,
-                                isDevMode,
-                                this.configReader,
-                                this.fs,
-                                this.generateSidebarView.bind(this) as RecursiveViewGeneratorFunction,
-                                this.globalGitBookExclusionList,
-                                this.docsPath
-                            );
-                            if (fileItem) {
-                                fileItems.push(fileItem);
+
+                    if (childViewTransition.canRecurse) {
+                        const dirConfigForFiles = {
+                            ...childViewTransition.nextConfig,
+                            _baseRelativePathForChildren: dirRelativeKey
+                        };
+
+                        for (const subEntry of subEntries) {
+                            if (
+                                subEntry.isFile() &&
+                                subEntry.name.toLowerCase().endsWith(".md") &&
+                                !isSidebarItemExcludedFileName(subEntry.name)
+                            ) {
+                                const fileItem = await processItem(
+                                    subEntry.name,
+                                    subEntry.path,
+                                    false, // isDir
+                                    dirConfigForFiles,
+                                    lang,
+                                    childViewTransition.nextDepth,
+                                    isDevMode,
+                                    this.configReader,
+                                    this.fs,
+                                    this.generateSidebarView.bind(this) as RecursiveViewGeneratorFunction,
+                                    this.globalGitBookExclusionList,
+                                    this.docsPath
+                                );
+                                if (fileItem) {
+                                    fileItems.push(fileItem);
+                                }
                             }
                         }
                     }
@@ -420,16 +410,9 @@ export class StructuralGeneratorService {
                     continue;
                 }
 
-                // For regular directories (with subdirectories), check if we should continue based on maxDepth
-                // dirEffectiveConfig.maxDepth already includes proper inheritance:
-                // - If directory has own maxDepth config, uses that
-                // - If directory doesn't have own config, inherits from parent/global
-                if (currentDepth < dirEffectiveConfig.maxDepth) {
-                    
-                    // Create directory config for flattening
-                    const dirRelativeKey = baseRelativePathKey ? `${baseRelativePathKey}${entry.name}/` : `${entry.name}/`;
+                if (childViewTransition.canRecurse) {
                     const dirConfigForFlattening = {
-                        ...dirEffectiveConfig,
+                        ...childViewTransition.nextConfig,
                         _baseRelativePathForChildren: dirRelativeKey
                     };
 
@@ -439,7 +422,7 @@ export class StructuralGeneratorService {
                         itemAbsPath,
                         dirConfigForFlattening,
                         lang,
-                        currentDepth + 1,
+                        childViewTransition.nextDepth,
                         isDevMode
                     );
 
@@ -530,7 +513,10 @@ export class StructuralGeneratorService {
     ): Promise<SidebarItem[]> {
         const normalizedCurrentContentPath = normalizePathSeparators(currentContentPath);
         
-        const isRootDirectoryProcessing = currentLevelDepth === 0 && effectiveConfigForThisView.root;
+        const isRootDirectoryProcessing =
+            currentLevelDepth === 0 &&
+            effectiveConfigForThisView.root &&
+            effectiveConfigForThisView._disableRootFlatten !== true;
         
         if (isRootDirectoryProcessing) {
             const rootSection = await this.generateRootSectionWithFlattenedContent(

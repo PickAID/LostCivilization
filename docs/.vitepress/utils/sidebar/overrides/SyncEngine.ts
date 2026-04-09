@@ -198,6 +198,8 @@ export class SyncEngine {
 
                 if (overrideType === 'order' && typeof existingJsonValue === 'number') {
                     item._priority = existingJsonValue;
+                } else if (overrideType === 'hidden') {
+                    item._hidden = existingJsonValue === true;
                 }
                 
                 existingEntriesUpdated++;
@@ -211,6 +213,8 @@ export class SyncEngine {
 
                 if (overrideType === 'order' && typeof existingJsonValue === 'number') {
                     item._priority = existingJsonValue;
+                } else if (overrideType === 'hidden') {
+                    item._hidden = existingJsonValue === true;
                 }
 
                 existingEntriesUpdated++;
@@ -221,7 +225,7 @@ export class SyncEngine {
                 } else if (overrideType === 'collapsed') {
                     defaultValue = item.collapsed !== undefined ? item.collapsed : true;
                 } else if (overrideType === 'hidden') {
-                    defaultValue = false;
+                    defaultValue = item._hidden === true;
                 } else if (overrideType === 'order') {
                     defaultValue = typeof item._priority === 'number' ? item._priority : Number.MAX_SAFE_INTEGER;
                 } else {

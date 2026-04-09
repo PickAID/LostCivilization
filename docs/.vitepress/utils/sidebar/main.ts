@@ -14,6 +14,8 @@ import { GitBookService } from "./external";
 import { GitBookParserService } from "./external/GitBookParserService";
 import { NodeFileSystem, type FileSystem } from "./shared/fileSystem";
 import { normalizePathSeparators } from "./shared/objectUtils";
+import { normalizeCollapseControl } from "./structure/collapseControl";
+import { normalizeViewControl } from "./structure/viewControl";
 import {
     SIDEBAR_CONFIG_FILE_CANDIDATES,
     resolveSidebarConfigFilePath,
@@ -51,6 +53,22 @@ function filterGroupedContent(items: any[], groupPaths: Set<string>): any[] {
     }).filter(item => item !== null);
 }
 
+function mergeStandaloneRootPropertiesPreservingChildren(
+    targetItem: SidebarItem,
+    standaloneItem: SidebarItem
+): void {
+    const preservedChildren = targetItem.items;
+    Object.assign(targetItem, standaloneItem);
+
+    if (preservedChildren !== undefined) {
+        targetItem.items = preservedChildren;
+    }
+}
+
+function cloneSidebarItemForStandaloneSync(item: SidebarItem): SidebarItem {
+    return JSON.parse(JSON.stringify(item)) as SidebarItem;
+}
+
 /**
  * @fileoverview Top-level orchestrator for the entire sidebar generation process.
  * 
@@ -83,10 +101,10 @@ interface GenerateSidebarsOptions {
 }
 
 /**
- * Finds all `index.md` files within a given language path that are marked with `root: true`.
+ * Finds all sidebar config markdown files within a given language path that are marked with `root: true`.
  * These define independent sidebar roots.
  * Filters out paths that are part of the GitBook exclusion list.
- * Also filters out nested roots that are within the scope of parent roots.
+ * Nested roots are preserved so each authored root can generate its own sidebar scope.
  * @param {string} langPath Absolute path to the language directory (e.g., `/path/to/docs/en`).
  * @param {FileSystem} fs FileSystem instance.
  * @param {string[]} gitbookExclusionList Array of absolute paths to globally excluded GitBook directories.
@@ -145,38 +163,7 @@ async function findAllRootIndexMdPaths(
         }
     }
 
-    const validRootIndexPaths: string[] = [];
-    
-    for (const currentRoot of potentialRootIndexPaths) {
-        const currentRootDir = normalizePathSeparators(path.dirname(currentRoot));
-        
-        const relativeToLang = normalizePathSeparators(path.relative(normalizedLangPath, currentRootDir));
-        const depthFromLang = relativeToLang === '' ? 0 : relativeToLang.split(path.sep).length;
-        
-        let isProblematicNestedRoot = false;
-        
-        for (const otherRoot of potentialRootIndexPaths) {
-            if (currentRoot === otherRoot) continue;
-            
-            const otherRootDir = normalizePathSeparators(path.dirname(otherRoot));
-            const otherRelativeToLang = normalizePathSeparators(path.relative(normalizedLangPath, otherRootDir));
-            const otherDepthFromLang = otherRelativeToLang === '' ? 0 : otherRelativeToLang.split(path.sep).length;
-            
-            const isWithinOther = (currentRootDir.startsWith(otherRootDir + '/') || currentRootDir.startsWith(otherRootDir + path.sep));
-            const isMuchDeeper = depthFromLang > otherDepthFromLang + 2;
-            
-            if (isWithinOther && isMuchDeeper) {
-                isProblematicNestedRoot = true;
-                break;
-            }
-        }
-        
-        if (!isProblematicNestedRoot) {
-            validRootIndexPaths.push(currentRoot);
-        }
-    }
-    
-    return validRootIndexPaths;
+    return [...new Set(potentialRootIndexPaths)].sort((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -272,6 +259,8 @@ export async function generateSidebars(
             effectiveConfig = {
                 ...effectiveConfig,
                 _baseRelativePathForChildren: "", 
+                _controlRelativePath: "",
+                _disableRootFlatten: false,
             };
             
 
@@ -333,7 +322,16 @@ export async function generateSidebars(
                             root: false,
                             priority: groupConfig.priority ?? (groupFrontmatter.priority || 0),
                             maxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || effectiveConfig.maxDepth),
+                            viewControl: normalizeViewControl(
+                                groupFrontmatter.viewControl ?? baseConfig.viewControl,
+                                baseConfig.viewControl.mode
+                            ),
+                            collapseControl: normalizeCollapseControl(
+                                groupFrontmatter.collapseControl ?? baseConfig.collapseControl
+                            ),
                             _baseRelativePathForChildren: '',
+                            _controlRelativePath: '',
+                            _disableRootFlatten: false,
                             itemOrder: Array.isArray(groupFrontmatter.itemOrder) ? {} : (groupFrontmatter.itemOrder || {})
                         };
                     } catch (error) {
@@ -343,7 +341,11 @@ export async function generateSidebars(
                             root: false,
                             priority: groupConfig.priority ?? 0,
                             maxDepth: groupConfig.maxDepth ?? effectiveConfig.maxDepth,
+                            viewControl: effectiveConfig.viewControl,
+                            collapseControl: effectiveConfig.collapseControl,
                             _baseRelativePathForChildren: '',
+                            _controlRelativePath: '',
+                            _disableRootFlatten: false,
                             externalLinks: [],
                             groups: [],
                             itemOrder: {}
@@ -403,6 +405,7 @@ export async function generateSidebars(
         }
         
         const processedFlattenedSections = new Set<string>();
+        const processedChildRootDecorations = new Set<string>();
         
         const searchForFlattenedRoots = async (items: any[], currentPath: string = ''): Promise<void> => {
             if (!Array.isArray(items)) return;
@@ -427,9 +430,9 @@ export async function generateSidebars(
                                 const itemRootKey = `/${normalizePathSeparators(path.relative(absDocsPath, itemPathInDocs))}/`;
                                 const normalizedItemRootKey = itemRootKey.replace(/\/\/+/g, "/");
                                 
-                                if (!processedFlattenedSections.has(normalizedItemRootKey)) {
+                                if (!processedChildRootDecorations.has(normalizedItemRootKey)) {
                                     const standaloneSection = [{
-                                        ...item,
+                                        ...cloneSidebarItemForStandaloneSync(item),
                                         _isRoot: true
                                     }];
                                     
@@ -443,9 +446,9 @@ export async function generateSidebars(
                                     
                                     if (processedSection && processedSection.length > 0) {
                                         const processedItem = processedSection[0];
-                                        Object.assign(item, processedItem);
+                                        mergeStandaloneRootPropertiesPreservingChildren(item, processedItem);
                                         
-                                        processedFlattenedSections.add(normalizedItemRootKey);
+                                        processedChildRootDecorations.add(normalizedItemRootKey);
                                     }
                                 }
                             }
@@ -524,9 +527,9 @@ export async function generateSidebars(
                                         const childRootKey = `/${normalizePathSeparators(path.relative(absDocsPath, childPathInDocs))}/`;
                                         const normalizedChildRootKey = childRootKey.replace(/\/\/+/g, "/");
                                         
-                                        if (!processedFlattenedSections.has(normalizedChildRootKey)) {
+                                        if (!processedChildRootDecorations.has(normalizedChildRootKey)) {
                                             const standaloneSection = [{
-                                                ...childItem,
+                                                ...cloneSidebarItemForStandaloneSync(childItem),
                                                 _isRoot: true
                                             }];
                                             
@@ -540,9 +543,9 @@ export async function generateSidebars(
                                             
                                             if (processedSection && processedSection.length > 0) {
                                                 const processedChild = processedSection[0];
-                                                Object.assign(childItem, processedChild);
+                                                mergeStandaloneRootPropertiesPreservingChildren(childItem, processedChild);
                                                 
-                                                processedFlattenedSections.add(normalizedChildRootKey);
+                                                processedChildRootDecorations.add(normalizedChildRootKey);
                                             }
                                         }
                                     }

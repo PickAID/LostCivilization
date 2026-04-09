@@ -1,12 +1,12 @@
 /**
  * @fileoverview Directory archive service for JSON configuration preservation.
- *
+ * 
  * This module provides specialized archival capabilities for complete directory
  * configurations when physical directories are moved or removed. It ensures
  * that valuable configuration data is preserved in organized archives while
  * maintaining metadata integrity and providing timestamp-based organization
  * for historical tracking and potential restoration.
- *
+ * 
  * @module DirectoryArchiveService
  * @version 1.0.0
  * @author M1hono
@@ -21,13 +21,13 @@ import type { FileSystem } from "../shared/fileSystem";
 
 /**
  * Specialized archival service for complete directory configuration preservation.
- *
+ * 
  * Provides comprehensive archival capabilities for entire directory configurations
  * when physical directories are moved or removed from the content structure.
  * Focuses on complete directory-level archival rather than individual value
  * preservation, ensuring that entire configuration contexts are maintained
  * for historical reference and potential restoration.
- *
+ * 
  * Key capabilities:
  * - Complete directory configuration archival
  * - Physical directory existence validation
@@ -35,7 +35,7 @@ import type { FileSystem } from "../shared/fileSystem";
  * - Metadata preservation alongside configuration data
  * - Automatic cleanup after successful archival
  * - Cross-platform path handling and normalization
- *
+ * 
  * @class DirectoryArchiveService
  * @since 1.0.0
  * @public
@@ -47,7 +47,7 @@ import type { FileSystem } from "../shared/fileSystem";
  *   fileSystem,
  *   '/docs'
  * );
- *
+ * 
  * // Archive outdated directories
  * await archiveService.archiveOutdatedDirectories(
  *   ['old-guide', 'removed-section'],
@@ -64,11 +64,11 @@ export class DirectoryArchiveService {
 
     /**
      * Creates an instance of DirectoryArchiveService.
-     *
+     * 
      * Initializes the archive service with necessary dependencies and establishes
      * the archive path structure. Sets up the service for complete directory
      * configuration archival with proper file system access and metadata handling.
-     *
+     * 
      * @param {JsonFileHandler} jsonFileHandler - JSON file handler for configuration operations
      * @param {MetadataManager} metadataManager - Metadata manager for tracking and preservation
      * @param {FileSystem} fs - File system interface for file operations
@@ -94,19 +94,19 @@ export class DirectoryArchiveService {
 
     /**
      * Archives complete directory configurations for outdated directories.
-     *
+     * 
      * Processes a list of outdated directory signatures and archives their
      * complete configurations when the corresponding physical directories
      * no longer exist. Ensures that valuable configuration data is preserved
      * even when content structures change significantly.
-     *
+     * 
      * The archival process:
      * 1. Validates that physical directories no longer exist
      * 2. Checks for the presence of configuration files to archive
      * 3. Performs complete directory configuration archival
      * 4. Organizes archived data with timestamp-based naming
      * 5. Cleans up original files after successful archival
-     *
+     * 
      * @param {string[]} outdatedDirs - Array of directory signatures that are no longer active
      * @param {string} lang - Language code for configuration organization
      * @returns {Promise<void>} Promise resolving when all archival operations complete
@@ -139,11 +139,11 @@ export class DirectoryArchiveService {
 
     /**
      * Converts a directory signature to its corresponding physical directory path.
-     *
+     * 
      * Maps directory signatures used in configuration management back to their
      * corresponding physical directory paths in the content structure. Handles
      * special cases like '_root' signature and language prefixes correctly.
-     *
+     * 
      * @param {string} dirSignature - Directory signature to convert (e.g., 'guide/concepts', '_root')
      * @param {string} lang - Language code for path construction
      * @returns {string} Normalized physical directory path
@@ -159,12 +159,12 @@ export class DirectoryArchiveService {
 
     /**
      * Checks if a directory has any configuration files worth archiving.
-     *
+     * 
      * Scans all override types (locales, order, collapsed, hidden) to determine
      * if the directory contains any configuration data. Only directories with
      * actual configuration content are considered for archival to avoid
      * creating empty archive entries.
-     *
+     * 
      * @param {string} lang - Language code for configuration access
      * @param {string} dirSignature - Directory signature to check
      * @returns {Promise<boolean>} Promise resolving to true if configuration files exist
@@ -187,19 +187,19 @@ export class DirectoryArchiveService {
 
     /**
      * Archives the complete configuration for a single directory.
-     *
+     * 
      * Performs comprehensive archival of all configuration files and metadata
      * for a specific directory. Creates timestamp-based archive organization
      * and ensures both configuration data and metadata are preserved together
      * for complete context preservation.
-     *
+     * 
      * The archival process:
      * 1. Generates timestamp-based archive directory name
      * 2. Processes all override types (locales, order, collapsed, hidden)
      * 3. Archives both JSON configuration data and metadata
      * 4. Deletes original files after successful archival
      * 5. Maintains proper directory structure in archive
-     *
+     * 
      * @param {string} lang - Language code for configuration organization
      * @param {string} dirSignature - Directory signature to archive
      * @returns {Promise<void>} Promise resolving when archival completes
@@ -215,7 +215,7 @@ export class DirectoryArchiveService {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const archiveDirName = `${path.basename(dirSignature)}_removed_${timestamp}`;
         const archiveDirParent = path.dirname(dirSignature);
-
+        
         const targetDirSignature = normalizePathSeparators(path.join(archiveDirParent, archiveDirName));
 
         const overrideTypes: JsonOverrideFileType[] = ['locales', 'order', 'collapsed', 'hidden'];
@@ -242,4 +242,4 @@ export class DirectoryArchiveService {
         if (hasArchivedAnyFile) {
         }
     }
-}
+} 

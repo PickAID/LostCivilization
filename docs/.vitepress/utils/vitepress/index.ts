@@ -9,6 +9,7 @@ import * as config from "./config";
 export * from "./api/navigation";
 export * from "./config";
 export * from "./api/frontmatter/hero";
+export * from "./api/frontmatter/metadata";
 export * from "./runtime/hero";
 export * from "./runtime/navigation";
 export * from "./runtime/theme";

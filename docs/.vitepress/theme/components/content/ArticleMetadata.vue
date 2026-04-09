@@ -1,31 +1,134 @@
 <script lang="ts" setup>
     import { useData } from "vitepress";
-    import { computed, ref, onMounted } from "vue";
+    import { computed, nextTick, onMounted, ref, watch } from "vue";
     import utils from "@utils";
     import ProgressLinear from "../ui/ProgressLinear.vue";
     import State from "../ui/State.vue";
     import { useSafeI18n } from "@utils/i18n/locale";
+    import type {
+        MetadataMetricKey,
+        NormalizedMetadataChip,
+        NormalizedMetadataSource,
+    } from "@utils/vitepress/api/frontmatter/metadata";
+    import {
+        normalizeMetadataFrontmatter,
+        resolveRouteFallbackLabel,
+    } from "@utils/vitepress/api/frontmatter/metadata";
 
-    /**
-     * Component ID for i18n translations.
-     */
     const { t } = useSafeI18n("article-metadata", {
         lastUpdated: "Last updated on: {date}",
-        wordCount: "Word count: {count} words",
-        readingTime: "Reading time: {time} minutes",
+        wordCount: "Word count: {count}",
+        readingTime: "Reading time: {time} min",
         pageViews: "Page views: {count}",
+        routeServerScripts: "Server Scripts",
+        routeClientScripts: "Client Scripts",
+        routeStartupScripts: "Startup Scripts",
+        routeDatagen: "Datagen",
+        routeRegistry: "Registry",
+        routeNetworking: "Networking",
+        routeMixin: "Mixin",
+        routeCapability: "Capability",
+        routeRendering: "Rendering",
+        routeConfig: "Config",
+        routeEvents: "Events",
+        routeWorldgen: "Worldgen",
+        routeCommand: "Commands",
+        routeToolchain: "Toolchain",
+        routeAddon: "Addon",
+        routeBlock: "Block",
+        routeItem: "Item",
+        routeEntity: "Entity",
+        routeLootTable: "Loot Table",
+        routeGlobalScope: "Global Scope",
+        routeRecipe: "Recipe",
+        routeTag: "Tag",
+        routeUpgrade: "Upgrade",
+        routeCodeShare: "Code Share",
+        sourceCurseforge: "CurseForge",
+        sourceModrinth: "Modrinth",
+        sourceMcmod: "MC百科",
+        sourceDocs: "Docs",
+        sourceGithub: "GitHub",
+        sideServer: "Server Side",
+        sideClient: "Client Side",
+        sideBoth: "Both Sides",
     });
+
+    const routeLabelKeys: Record<string, string> = {
+        addon: "routeAddon",
+        block: "routeBlock",
+        capability: "routeCapability",
+        client_scripts: "routeClientScripts",
+        code_share: "routeCodeShare",
+        command: "routeCommand",
+        config: "routeConfig",
+        datagen: "routeDatagen",
+        entity: "routeEntity",
+        events: "routeEvents",
+        global_scope: "routeGlobalScope",
+        item: "routeItem",
+        loot_table: "routeLootTable",
+        mixin: "routeMixin",
+        networking: "routeNetworking",
+        recipe: "routeRecipe",
+        registry: "routeRegistry",
+        rendering: "routeRendering",
+        server_scripts: "routeServerScripts",
+        startup_scripts: "routeStartupScripts",
+        tag: "routeTag",
+        toolchain: "routeToolchain",
+        upgrade: "routeUpgrade",
+        worldgen: "routeWorldgen",
+    };
+
+    const sourceLabelKeys: Record<string, string> = {
+        curseforge: "sourceCurseforge",
+        docs: "sourceDocs",
+        github: "sourceGithub",
+        mcmod: "sourceMcmod",
+        modrinth: "sourceModrinth",
+    };
+
+    const sideLabelKeys: Record<string, string> = {
+        server: "sideServer",
+        client: "sideClient",
+        both: "sideBoth",
+    };
+
+    const ALL_METRIC_KEYS: MetadataMetricKey[] = [
+        "update",
+        "wordCount",
+        "readTime",
+        "pageViews",
+    ];
+
+    const GROUP_KEY_ICONS: Record<string, string> = {
+        currentVersion: "mdi-tag-outline",
+        latestVersion: "mdi-tag-outline",
+        requiredMods: "mdi-puzzle-outline",
+        routes: "mdi-compass-outline",
+        currentStack: "mdi-layers-outline",
+        loaders: "mdi-cog-outline",
+        side: "mdi-server-outline",
+    };
+
+    interface ContextItem {
+        key: string;
+        icon: string;
+        label: string;
+        href?: string;
+        target?: string;
+        rel?: string;
+        hoverLines?: string[];
+    }
 
     const { page, frontmatter, lang } = useData();
 
     const gitTimestamp = ref<number>(0);
     const timestampCache = new Map<string, number>();
+    const wordCount = ref(0);
+    const imageCount = ref(0);
 
-    /**
-     * Fetches the last git commit timestamp for a given file path.
-     * @param filePath - The path to the file
-     * @returns Unix timestamp in milliseconds
-     */
     async function getGitTimestamp(filePath: string): Promise<number> {
         if (typeof window === "undefined") return 0;
 
@@ -34,7 +137,7 @@
 
         try {
             const response = await fetch(
-                `/__git_timestamp__?file=${encodeURIComponent(filePath)}`
+                `/__git_timestamp__?file=${encodeURIComponent(filePath)}`,
             );
             if (response.ok) {
                 const timestamp = await response.json();
@@ -48,9 +151,29 @@
         return Date.now();
     }
 
-    /**
-     * Computed property for formatted last update date.
-     */
+    function translate(key: string, fallback: string): string {
+        const value = (t as Record<string, string | undefined>)[key];
+        return typeof value === "string" && value.length > 0 ? value : fallback;
+    }
+
+    function humanizeToken(token: string): string {
+        return token
+            .replace(/[_-]+/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    const resolvedMetadata = computed(() =>
+        normalizeMetadataFrontmatter(frontmatter.value?.metadata),
+    );
+
+    const isMetadata = computed(() => resolvedMetadata.value.enabled);
+
+    const visibleMetricKeys = computed(() =>
+        ALL_METRIC_KEYS.filter((key) => resolvedMetadata.value.metrics[key]),
+    );
+
+    const hasMetrics = computed(() => visibleMetricKeys.value.length > 0);
+
     const update = computed(() => {
         let timestamp = 0;
 
@@ -71,51 +194,135 @@
         });
     });
 
-    const wordCount = ref(0);
-    const imageCount = ref(0);
-    const pageViews = ref(0);
-    const pageViewsLoading = ref(false);
-    const pageViewsError = ref(false);
-
-    /**
-     * Calculates estimated reading time based on word and image count.
-     */
     const readTime = computed(() => {
         const time = utils.vitepress.readingTime.calculateTotalTime(
             wordCount.value,
-            imageCount.value
+            imageCount.value,
         );
         return typeof time === "number" ? time : 0;
     });
 
-    /**
-     * Analyzes the page content to extract word count and image count.
-     */
-    function analyze() {
-        if (typeof window !== "undefined" && typeof document !== "undefined") {
-            utils.vitepress.contentAnalysis.cleanupMetadata();
+    const metadataContent = computed<
+        Record<Exclude<MetadataMetricKey, "pageViews">, string>
+    >(() => ({
+        update: translate("lastUpdated", "Last updated on: {date}").replace(
+            "{date}",
+            update.value || "",
+        ),
+        wordCount: translate("wordCount", "Word count: {count}").replace(
+            "{count}",
+            String(wordCount.value || 0),
+        ),
+        readTime: translate("readingTime", "Reading time: {time} min").replace(
+            "{time}",
+            String(readTime.value || 0),
+        ),
+    }));
 
-            const mainContainer = window.document.querySelector(
-                ".content-container .main"
-            );
-            if (!mainContainer) return;
-
-            const clone = mainContainer.cloneNode(true) as HTMLElement;
-
-            clone
-                .querySelectorAll(".md-dialog-card")
-                .forEach((el) => el.remove());
-
-            const imgs = clone.querySelectorAll<HTMLImageElement>("img");
-            imageCount.value = imgs?.length || 0;
-
-            const words = clone.textContent || "";
-            const count = utils.content.countWord(words);
-            wordCount.value = typeof count === "number" ? count : 0;
+    function resolveChipLabel(chip: NormalizedMetadataChip): string {
+        if (chip.kind === "route") {
+            if (!chip.id) return chip.label;
+            const key = routeLabelKeys[chip.id];
+            if (!key) return resolveRouteFallbackLabel(chip.id);
+            return translate(key, resolveRouteFallbackLabel(chip.id));
         }
+        return chip.label;
     }
 
-    onMounted(async () => {
+    function resolveChipLabelInGroup(chip: NormalizedMetadataChip, groupKey: string): string {
+        if (groupKey === "side" && chip.id) {
+            const key = sideLabelKeys[chip.id];
+            if (key) return translate(key, chip.label);
+        }
+        return resolveChipLabel(chip);
+    }
+
+    function resolveSourceLabel(source: NormalizedMetadataSource): string {
+        if (source.label) return source.label;
+        const key = sourceLabelKeys[source.type];
+        if (!key) return humanizeToken(source.type);
+        return translate(key, humanizeToken(source.type));
+    }
+
+    const contextItems = computed<ContextItem[]>(() => {
+        const meta = resolvedMetadata.value;
+        if (meta.mode === "doc") return [];
+        if (meta.groups.length === 0 && meta.sources.length === 0) return [];
+
+        const items: ContextItem[] = [];
+
+        for (const group of meta.groups) {
+            if (group.items.length === 0) continue;
+
+            const groupIcon =
+                GROUP_KEY_ICONS[group.key] ?? "mdi-label-outline";
+            const labels = group.items.map((chip) => resolveChipLabelInGroup(chip, group.key));
+
+            const allHoverLines: string[] = [];
+            if (group.items.length === 1) {
+                allHoverLines.push(...(group.items[0].hoverLines ?? []));
+            } else {
+                for (const chip of group.items) {
+                    const chipLabel = resolveChipLabelInGroup(chip, group.key);
+                    const lines = chip.hoverLines ?? [];
+                    if (lines.length > 0) {
+                        allHoverLines.push(
+                            `${chipLabel}: ${lines.join(", ")}`,
+                        );
+                    }
+                }
+            }
+
+            items.push({
+                key: group.key,
+                icon: groupIcon,
+                label: labels.join(" · "),
+                hoverLines:
+                    allHoverLines.length > 0 ? allHoverLines : undefined,
+            });
+        }
+
+        for (const source of meta.sources) {
+            items.push({
+                key: `source-${source.type}-${source.href}`,
+                icon: "",
+                label: resolveSourceLabel(source),
+                href: source.href,
+                target: "_blank",
+                rel: "noopener noreferrer",
+            });
+        }
+
+        return items;
+    });
+
+    function analyze() {
+        if (typeof window === "undefined" || typeof document === "undefined")
+            return;
+
+        utils.vitepress.contentAnalysis.cleanupMetadata();
+
+        const mainContainer = window.document.querySelector(
+            ".content-container .main",
+        );
+        if (!mainContainer) return;
+
+        const clone = mainContainer.cloneNode(true) as HTMLElement;
+        clone
+            .querySelectorAll(".md-dialog-card")
+            .forEach((element) => element.remove());
+
+        const images = clone.querySelectorAll<HTMLImageElement>("img");
+        imageCount.value = images.length || 0;
+
+        const words = clone.textContent || "";
+        const count = utils.content.countWord(words);
+        wordCount.value = typeof count === "number" ? count : 0;
+    }
+
+    async function refreshDerivedMetadata() {
+        gitTimestamp.value = 0;
+        await nextTick();
         analyze();
 
         if (
@@ -123,69 +330,46 @@
             !frontmatter.value.lastUpdated &&
             !frontmatter.value.date
         ) {
-            try {
-                gitTimestamp.value = await getGitTimestamp(page.value.filePath);
-            } catch (error) {
-                console.warn(
-                    "Failed to get git timestamp for",
-                    page.value.filePath,
-                    error
-                );
-            }
+            gitTimestamp.value = await getGitTimestamp(page.value.filePath);
         }
+    }
+
+    onMounted(() => {
+        refreshDerivedMetadata();
     });
 
-    /**
-     * Determines whether to display metadata based on frontmatter.
-     */
-    const isMetadata = computed(() => {
-        return frontmatter.value?.metadata ?? true;
-    });
+    watch(
+        () => page.value.filePath,
+        () => {
+            refreshDerivedMetadata();
+        },
+    );
 
-    /**
-     * Gets the icon name for a given metadata key.
-     * @param key - The metadata key
-     * @returns Icon name string
-     */
-    const icon = (key: string) => {
+    function metricIcon(key: MetadataMetricKey) {
         return utils.vitepress.getMetadataIcon(key);
-    };
-
-    /**
-     * Computed object containing formatted metadata content.
-     */
-    const metadataContent = computed(() => ({
-        update: t.lastUpdated.replace("{date}", update.value || ""),
-        wordCount: t.wordCount.replace("{count}", String(wordCount.value || 0)),
-        readTime: t.readingTime.replace("{time}", String(readTime.value || 0)),
-    }));
-
-    /**
-     * List of metadata keys to display.
-     */
-    const metadataKeys = ["update", "wordCount", "readTime", "pageViews"] as const;
+    }
 </script>
 
 <template>
     <div v-if="isMetadata" class="word">
         <div>
-            <v-row no-gutters>
-                <v-col v-for="key in metadataKeys" :key="key">
+            <v-row v-if="hasMetrics" no-gutters>
+                <v-col v-for="key in visibleMetricKeys" :key="key">
                     <v-btn
                         class="mx-0 btn btn-icon"
                         rounded="lg"
                         variant="text"
                         density="comfortable"
-                        :prepend-icon="icon(key)"
+                        :prepend-icon="metricIcon(key)"
                     >
                         <span v-if="key !== 'pageViews'">
                             {{ metadataContent[key] }}
                         </span>
                         <span
-                            v-if="key === 'pageViews'"
+                            v-else
                             id="busuanzi_container_page_pv"
                         >
-                            {{ t.pageViews.replace("{count}", "")
+                            {{ translate("pageViews", "Page views: {count}").replace("{count}", "")
                             }}<span id="busuanzi_value_page_pv"
                                 ><i class="fa fa-spinner fa-spin"></i
                             ></span>
@@ -193,6 +377,54 @@
                     </v-btn>
                 </v-col>
             </v-row>
+
+            <v-row v-if="contextItems.length > 0" no-gutters>
+                <v-col v-for="item in contextItems" :key="item.key">
+                    <v-tooltip
+                        v-if="item.hoverLines && item.hoverLines.length > 0"
+                        location="bottom"
+                        open-delay="150"
+                        content-class="article-metadata__tooltip"
+                    >
+                        <template #activator="{ props: tooltipProps }">
+                            <v-btn
+                                class="mx-0 btn btn-icon"
+                                rounded="lg"
+                                variant="text"
+                                density="comfortable"
+                                :prepend-icon="item.icon || undefined"
+                                v-bind="tooltipProps"
+                            >
+                                {{ item.label }}
+                            </v-btn>
+                        </template>
+                        <div class="article-metadata__tooltip-body">
+                            <div
+                                v-for="(line, i) in item.hoverLines"
+                                :key="i"
+                                class="article-metadata__tooltip-line"
+                            >
+                                {{ line }}
+                            </div>
+                        </div>
+                    </v-tooltip>
+
+                    <v-btn
+                        v-else
+                        class="mx-0 btn btn-icon"
+                        rounded="lg"
+                        variant="text"
+                        density="comfortable"
+                        :prepend-icon="item.icon || undefined"
+                        :href="item.href"
+                        :target="item.target"
+                        :rel="item.rel"
+                    >
+                        {{ item.label }}
+                    </v-btn>
+                </v-col>
+            </v-row>
+
             <ProgressLinear />
         </div>
     </div>
@@ -216,5 +448,34 @@
         margin-inline: calc(var(--v-btn-height) / -9) 0px;
         color: var(--metadata-text-color);
         opacity: var(--metadata-icon-opacity);
+    }
+
+    /* ── tooltip ──────────────────────────────────────── */
+
+    .article-metadata__tooltip {
+        border-radius: var(--border-radius-md) !important;
+        border: 1px solid var(--vp-c-divider);
+        background: var(--vp-c-bg-soft) !important;
+        box-shadow: none;
+        padding: 0 !important;
+        max-width: min(280px, calc(100vw - 32px));
+    }
+
+    .article-metadata__tooltip-body {
+        padding: 6px 10px;
+    }
+
+    .article-metadata__tooltip-line {
+        color: var(--vp-c-text-2);
+        font-size: 12px;
+        line-height: 1.6;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+    }
+
+    .article-metadata__tooltip-line + .article-metadata__tooltip-line {
+        margin-top: 3px;
+        padding-top: 3px;
+        border-top: 1px dashed color-mix(in srgb, var(--vp-c-divider) 60%, transparent);
     }
 </style>

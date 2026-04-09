@@ -72,6 +72,58 @@ export interface ExternalLinkConfig {
 }
 
 /**
+ * Controls how a directory view delegates sidebar traversal rules to descendants.
+ * Primarily affects recursive expansion behavior such as `maxDepth`.
+ */
+export type SidebarViewControlMode = 'self' | 'children' | 'roots' | 'all';
+
+export interface SidebarViewControlConfig {
+    /**
+     * Controls the current controller's traversal ownership for this generation pass.
+     * It does not mutate child roots permanently.
+     *
+     * `self`: current view keeps control for all descendants.
+     * `children`: non-root child directories can take control, nested roots stay under current view.
+     * `roots`: nested roots can take control, regular children stay under current view.
+     * `all`: every descendant directory can take control.
+     */
+    mode?: SidebarViewControlMode
+    /**
+     * Relative directory paths that are allowed to escape the current view mode
+     * and use their own local traversal config.
+     */
+    allow?: string[] | Record<string, boolean>
+    /**
+     * Directory-level override for whether this directory stays under its parent
+     * view's traversal control.
+     */
+    controlledByParent?: boolean
+}
+
+export interface ResolvedSidebarViewControl {
+    mode: SidebarViewControlMode
+    allow: string[]
+    controlledByParent?: boolean
+}
+
+/**
+ * Controls collapsed state for child directory items in the current sidebar view.
+ * This only affects how items appear in the current generated sidebar and does
+ * not rewrite the child directory's own local config.
+ */
+export interface SidebarCollapseControlConfig {
+    /** Optional default collapsed state for child directory items in this view */
+    default?: boolean
+    /** Per-path collapsed overrides, relative to the current sidebar view root */
+    paths?: Record<string, boolean>
+}
+
+export interface ResolvedSidebarCollapseControl {
+    default?: boolean
+    paths: Record<string, boolean>
+}
+
+/**
  * @interface DirectoryConfig
  * @description Configuration options for a directory, typically from index.md frontmatter.
  * Defines how a directory should be processed and displayed in the sidebar structure.
@@ -95,6 +147,10 @@ export interface DirectoryConfig {
     groups?: GroupConfig[]
     /** External links to be added to this directory's sidebar */
     externalLinks?: ExternalLinkConfig[]
+    /** Controls whether descendant directories can take over traversal config */
+    viewControl?: SidebarViewControlConfig
+    /** Controls collapsed state for child directory items in the current view */
+    collapseControl?: SidebarCollapseControlConfig
     /** Allow other frontmatter fields */
     [key: string]: any
 }
@@ -136,6 +192,10 @@ export interface GlobalSidebarConfig {
         itemOrder?: Record<string, number> | string[]
         /** Default hidden state for items if not specified */
         hidden?: boolean
+        /** Global fallback for descendant traversal control */
+        viewControl?: SidebarViewControlConfig
+        /** Global fallback for child collapsed state in the current view */
+        collapseControl?: SidebarCollapseControlConfig
     }
     /** Allow other configuration fields */
     [key: string]: any
@@ -166,6 +226,10 @@ export interface EffectiveDirConfig {
     groups: GroupConfig[]
     /** Resolved external links, if any */
     externalLinks: ExternalLinkConfig[]
+    /** Resolved descendant traversal control */
+    viewControl: ResolvedSidebarViewControl
+    /** Resolved child collapsed-state control for the current view */
+    collapseControl: ResolvedSidebarCollapseControl
     /** Absolute path to the directory this config is for */
     path: string
     /** Language of this config */
@@ -174,6 +238,14 @@ export interface EffectiveDirConfig {
     isDevMode: boolean
     /** @internal Base for relative keys of children */
     _baseRelativePathForChildren?: string
+    /** @internal Relative path from the active traversal controller */
+    _controlRelativePath?: string
+    /** @internal Prevent root flattening when the directory is embedded in a parent view */
+    _disableRootFlatten?: boolean
+    /** @internal Active traversal maxDepth for the current generation pass */
+    _controllerMaxDepth?: number
+    /** @internal Active traversal ownership config for the current generation pass */
+    _controllerViewControl?: ResolvedSidebarViewControl
     /** Allow other merged fields */
     [key: string]: any
 }
@@ -252,4 +324,3 @@ export interface SidebarContext {
     /** Whether running in development mode */
     isDevMode: boolean
 }
-

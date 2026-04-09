@@ -165,13 +165,11 @@ test("buildKnownPagePathSet accepts both absolute and relative src roots", () =>
     const knownPagePaths = buildKnownPagePathSet([
         "/src/zh-CN/Developing/index.md",
         "../../../../src/zh-CN/Developing/Catalogue.md",
-        "../../../../src/zh-CN/Developing/Description.md",
     ]);
 
     assert.deepEqual([...knownPagePaths].sort(), [
         "/zh-CN/Developing/",
         "/zh-CN/Developing/Catalogue/",
-        "/zh-CN/Developing/Description/",
     ]);
 });
 
@@ -238,7 +236,7 @@ test("buildBreadcrumbItems resolves directory landing pages from sidebar-aware p
         localeCodes: ["en-US", "zh-CN"],
         knownPagePaths: new Set([
             "/zh-CN/ModdingDeveloping/Catalogue/",
-            "/zh-CN/ModdingDeveloping/Design/Description/",
+            "/zh-CN/ModdingDeveloping/Design/Catalogue/",
             "/zh-CN/ModdingDeveloping/Design/Survey/",
         ]),
         navTree: [
@@ -248,7 +246,7 @@ test("buildBreadcrumbItems resolves directory landing pages from sidebar-aware p
             },
             {
                 text: "Design",
-                link: "/ModdingDeveloping/Design/Description",
+                link: "/ModdingDeveloping/Design/Catalogue",
             },
             {
                 text: "Survey",
@@ -260,7 +258,7 @@ test("buildBreadcrumbItems resolves directory landing pages from sidebar-aware p
                 return "/zh-CN/ModdingDeveloping/Catalogue";
             }
             if (path === "/zh-CN/ModdingDeveloping/Design/") {
-                return "/zh-CN/ModdingDeveloping/Design/Description";
+                return "/zh-CN/ModdingDeveloping/Design/Catalogue";
             }
             return path;
         },
@@ -274,7 +272,7 @@ test("buildBreadcrumbItems resolves directory landing pages from sidebar-aware p
         },
         {
             text: "Design",
-            link: "/zh-CN/ModdingDeveloping/Design/Description/",
+            link: "/zh-CN/ModdingDeveloping/Design/Catalogue/",
         },
         { text: "Survey", link: "/zh-CN/ModdingDeveloping/Design/Survey/" },
     ]);

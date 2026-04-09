@@ -223,6 +223,15 @@ function getFileCachePath(lang: string): string {
     return resolve(cacheDir, `${getCacheKey(lang)}.json`);
 }
 
+function getVitepressTransformedSidebarCachePath(lang: string): string {
+    const config = getConfig();
+    return resolve(
+        config.rootDir,
+        ".vitepress/cache",
+        `${getCacheKey(lang)}.json`,
+    );
+}
+
 function getNewestMatchingMtime(
     rootPath: string,
     matcher: (fileName: string) => boolean
@@ -710,6 +719,20 @@ export function clearCache(lang?: string): void {
                 }
             }
         }
+
+        const vitepressCachePath = getVitepressTransformedSidebarCachePath(lang);
+        if (existsSync(vitepressCachePath)) {
+            try {
+                unlinkSync(vitepressCachePath);
+            } catch (error) {
+                if (config.debug) {
+                    console.warn(
+                        `[SidebarLib] Error clearing VitePress sidebar cache:`,
+                        error
+                    );
+                }
+            }
+        }
     } else {
         memoryCache.clear();
 
@@ -726,6 +749,25 @@ export function clearCache(lang?: string): void {
                 if (config.debug) {
                     console.warn(
                         `[SidebarLib] Error clearing cache directory:`,
+                        error
+                    );
+                }
+            }
+        }
+
+        const vitepressCacheDir = resolve(config.rootDir, ".vitepress/cache");
+        if (existsSync(vitepressCacheDir)) {
+            try {
+                const files = readdirSync(vitepressCacheDir);
+                for (const file of files) {
+                    if (file.startsWith("sidebar_") && file.endsWith(".json")) {
+                        unlinkSync(resolve(vitepressCacheDir, file));
+                    }
+                }
+            } catch (error) {
+                if (config.debug) {
+                    console.warn(
+                        `[SidebarLib] Error clearing VitePress cache directory:`,
                         error
                     );
                 }

@@ -60,10 +60,10 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 0.3rem 0.85rem;
-        margin: 0.18rem 0 0.95rem;
+        gap: 0.22rem 0.68rem;
+        margin: 0.12rem 0 0.82rem;
         max-width: 48rem;
-        font-size: var(--metadata-font-size, 0.84rem);
+        font-size: 0.75rem;
         line-height: 1.45;
     }
 
@@ -83,6 +83,7 @@
         background: transparent;
         color: var(--page-tag-text-color);
         font: inherit;
+        letter-spacing: 0.01em;
         line-height: inherit;
         cursor: pointer;
         transition: color 0.18s ease, opacity 0.18s ease;
@@ -108,8 +109,8 @@
 
     @media (max-width: 768px) {
         .page-tags {
-            gap: 0.26rem 0.68rem;
-            margin-bottom: 0.82rem;
+            gap: 0.2rem 0.54rem;
+            margin-bottom: 0.72rem;
             max-width: 100%;
         }
     }

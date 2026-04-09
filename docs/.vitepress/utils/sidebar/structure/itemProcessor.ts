@@ -7,7 +7,12 @@ import { generateLink } from "./linkGenerator";
 import { generatePathKey } from "./pathKeyGenerator";
 import { normalizePathSeparators } from "../shared/objectUtils";
 import {
-    isSidebarConfigFileName,
+    joinSidebarBaseRelativePath,
+    resolveChildViewTransition,
+} from "./viewControl";
+import { resolveChildCollapsedState } from "./collapseControl";
+import {
+    isSidebarItemExcludedFileName,
     resolveSidebarConfigFilePath,
 } from "../shared/sidebarFileConventions";
 
@@ -79,7 +84,7 @@ async function processFileEntry(
         return null;
     }
 
-    if (isSidebarConfigFileName(entryName)) {
+    if (isSidebarItemExcludedFileName(entryName)) {
         return null;
     }
 
@@ -145,6 +150,7 @@ async function createRootLinkItem(
     normalizedItemAbsPath: string,
     itemRelativePathKey: string,
     dirEffectiveConfig: EffectiveDirConfig,
+    parentViewEffectiveConfig: EffectiveDirConfig,
     docsAbsPath: string,
     lang: string,
     fs: FileSystem
@@ -166,7 +172,11 @@ async function createRootLinkItem(
         text: dirEffectiveConfig.title,
         link: linkToSubRoot,
         items: [],
-        collapsed: dirEffectiveConfig.collapsed,
+        collapsed: resolveChildCollapsedState(
+            parentViewEffectiveConfig,
+            dirEffectiveConfig,
+            itemRelativePathKey,
+        ),
         _priority: dirEffectiveConfig.priority,
         _relativePathKey: itemRelativePathKey,
         _isDirectory: true,
@@ -208,7 +218,7 @@ async function hasNestedMarkdownContent(
             if (
                 entry.isFile() &&
                 entry.name.toLowerCase().endsWith(".md") &&
-                !isSidebarConfigFileName(entry.name)
+                !isSidebarItemExcludedFileName(entry.name)
             ) {
                 return true;
             }
@@ -269,18 +279,28 @@ async function processDirectoryEntry(
     ) => Promise<SidebarItem[]>
 ): Promise<SidebarItem | null> {
     let subItems: SidebarItem[] = [];
-    
-    if (currentLevelDepth < parentViewEffectiveConfig.maxDepth) {
+
+    const childViewTransition = resolveChildViewTransition(
+        parentViewEffectiveConfig,
+        dirEffectiveConfig,
+        itemRelativePathKey,
+        currentLevelDepth
+    );
+
+    if (childViewTransition.canRecurse) {
         const subDirContextConfig = {
-            ...dirEffectiveConfig,
-            _baseRelativePathForChildren: itemRelativePathKey,
+            ...childViewTransition.nextConfig,
+            _baseRelativePathForChildren: joinSidebarBaseRelativePath(
+                parentViewEffectiveConfig._baseRelativePathForChildren,
+                itemRelativePathKey
+            ),
         };
-        
+
         subItems = await recursiveGenerator(
             normalizedItemAbsPath,
             subDirContextConfig,
             lang,
-            currentLevelDepth + 1,
+            childViewTransition.nextDepth,
             isDevMode
         );
     }
@@ -311,7 +331,11 @@ async function processDirectoryEntry(
         text: directoryTitle,
         link: linkToDir || undefined,
         items: subItems.length > 0 ? subItems : [],
-        collapsed: dirEffectiveConfig.collapsed,
+        collapsed: resolveChildCollapsedState(
+            parentViewEffectiveConfig,
+            dirEffectiveConfig,
+            itemRelativePathKey,
+        ),
         _priority: dirEffectiveConfig.priority,
         _relativePathKey: itemRelativePathKey,
         _isDirectory: true,
@@ -428,7 +452,6 @@ export async function processItem(
         return null;
     }
 
-    const parentKeyForChildren = parentViewEffectiveConfig._baseRelativePathForChildren ?? "";
     const parentDirAbsPath = path.dirname(normalizedItemAbsPath);
     const itemRelativePathKey = generatePathKey(
         normalizedItemAbsPath,
@@ -457,7 +480,9 @@ export async function processItem(
         isDevMode
     );
 
-    const isProcessingWithinExistingRoot = currentLevelDepth > 0;
+    const isProcessingWithinExistingRoot =
+        currentLevelDepth > 0 ||
+        parentViewEffectiveConfig._disableRootFlatten === true;
     
     if (
         dirEffectiveConfig.root &&
@@ -469,6 +494,7 @@ export async function processItem(
             normalizedItemAbsPath,
             itemRelativePathKey,
             dirEffectiveConfig,
+            parentViewEffectiveConfig,
             docsAbsPath,
             lang,
             fs

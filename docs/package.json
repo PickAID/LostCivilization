@@ -68,8 +68,7 @@
         "locale": "tsx .vitepress/scripts/locale-key-sync.mjs",
         "title": "tsx .vitepress/scripts/update-index-titles.mjs",
         "frontmatter": "tsx .vitepress/scripts/update-frontmatter.mjs",
-        "sync-config": "tsx .vitepress/scripts/sync-config-to-frontmatter.mjs",
-        "index": "tsx .vitepress/scripts/create-indexes.mjs"
+        "sync-config": "tsx .vitepress/scripts/sync-config-to-frontmatter.mjs"
     },
     "dependencies": {
         "@dhlx/vitepress-plugin-drawio": "^0.0.10",

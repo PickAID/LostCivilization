@@ -7,22 +7,22 @@
   "PseudoInstance.md": {
     "valueHash": "1026b64a48c595ad230165f08255a237",
     "isUserSet": false,
-    "isActiveInStructure": true
+    "isActiveInStructure": false
   },
   "CivilizationShell.md": {
     "valueHash": "a6908cedb95b70bd212e7339932a0da8",
     "isUserSet": false,
-    "isActiveInStructure": true
+    "isActiveInStructure": false
   },
   "ArchaeologyLoop.md": {
     "valueHash": "fc72eb46074cdb856128e8241ce907c9",
     "isUserSet": false,
-    "isActiveInStructure": true
+    "isActiveInStructure": false
   },
   "Catalogue.md": {
     "valueHash": "767fa455bb6826f4b550c21a6bca7182",
     "isUserSet": false,
-    "isActiveInStructure": true
+    "isActiveInStructure": false
   },
   "Survey.md": {
     "valueHash": "2b4a4876690d4272a1f0f7b02ffb333c",
@@ -48,5 +48,10 @@
     "valueHash": "7f9298c267a96b2c6fbfcd428ab9b8ea",
     "isUserSet": false,
     "isActiveInStructure": false
+  },
+  "Design/": {
+    "valueHash": "b08890a6ef3b65218573ed90770b08fd",
+    "isUserSet": false,
+    "isActiveInStructure": true
   }
 }
