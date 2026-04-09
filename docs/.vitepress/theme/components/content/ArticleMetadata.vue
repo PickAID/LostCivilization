@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import { useData } from "vitepress";
+    import { useData, useRoute } from "vitepress";
     import { computed, nextTick, onMounted, ref, watch } from "vue";
     import utils from "@utils";
     import ProgressLinear from "../ui/ProgressLinear.vue";
@@ -10,6 +10,9 @@
         NormalizedMetadataChip,
         NormalizedMetadataSource,
     } from "@utils/vitepress/api/frontmatter/metadata";
+    import {
+        resolveEffectiveMetadataFrontmatter,
+    } from "@utils/vitepress/api/frontmatter/metadata/DirectoryMetadataInheritance";
     import {
         normalizeMetadataFrontmatter,
         resolveRouteFallbackLabel,
@@ -123,6 +126,7 @@
     }
 
     const { page, frontmatter, lang } = useData();
+    const route = useRoute();
 
     const gitTimestamp = ref<number>(0);
     const timestampCache = new Map<string, number>();
@@ -163,7 +167,12 @@
     }
 
     const resolvedMetadata = computed(() =>
-        normalizeMetadataFrontmatter(frontmatter.value?.metadata),
+        normalizeMetadataFrontmatter(
+            resolveEffectiveMetadataFrontmatter(
+                route.path,
+                frontmatter.value?.metadata,
+            ),
+        ),
     );
 
     const isMetadata = computed(() => resolvedMetadata.value.enabled);

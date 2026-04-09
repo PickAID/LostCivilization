@@ -7,6 +7,7 @@ import {
 } from "../utils/sidebar/index.ts";
 import { getLanguageLinks } from "../utils/config/project-config.ts";
 import { getSrcPath } from "../utils/config/path-resolver.js";
+import { generateDirectoryMetadataCache } from "./generate-directory-metadata-cache.mjs";
 
 async function buildSidebars() {
     console.log("🚀 Starting sidebar generation...");
@@ -44,6 +45,8 @@ async function buildSidebars() {
             }
         }
     }
+
+    await generateDirectoryMetadataCache();
 }
 
 buildSidebars();
