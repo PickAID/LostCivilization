@@ -283,8 +283,7 @@ export async function generateSidebars(
                         const baseConfig = {
                             ...effectiveConfig,
                             externalLinks: [],
-                            groups: [],
-                            itemOrder: {}
+                            groups: []
                         };
                         
                         groupEffectiveConfig = {
@@ -299,8 +298,7 @@ export async function generateSidebars(
                             ),
                             _baseRelativePathForChildren: '',
                             _disableRootFlatten: false,
-                            _activeMaxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || effectiveConfig.maxDepth),
-                            itemOrder: Array.isArray(groupFrontmatter.itemOrder) ? {} : (groupFrontmatter.itemOrder || {})
+                            _activeMaxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || effectiveConfig.maxDepth)
                         };
                     } catch (error) {
                         groupEffectiveConfig = {
@@ -314,8 +312,7 @@ export async function generateSidebars(
                             _disableRootFlatten: false,
                             _activeMaxDepth: groupConfig.maxDepth ?? effectiveConfig.maxDepth,
                             externalLinks: [],
-                            groups: [],
-                            itemOrder: {}
+                            groups: []
                         };
                     }
                     

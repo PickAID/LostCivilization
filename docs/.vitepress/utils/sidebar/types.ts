@@ -37,7 +37,7 @@ export interface SidebarItem {
     _isRoot?: boolean
     /** @internal Whether this item should be hidden from sidebar */
     _hidden?: boolean
-    /** @internal Key used for itemOrder lookups. For files/dirs: relative path from current sidebar root (e.g., 'concepts/file.md'). For groups: the group's title or path. */
+    /** @internal Stable relative key used for deterministic alphabetical fallback within the current sidebar scope. */
     _relativePathKey?: string
 }
 
@@ -111,8 +111,6 @@ export interface DirectoryConfig {
     maxDepth?: number
     /** Default collapsed state for this item if it's a directory */
     collapsed?: boolean
-    /** Order of items within this directory */
-    itemOrder?: string[] | Record<string, number>
     /** Group configurations for splitting content into separate sections */
     groups?: GroupConfig[]
     /** External links to be added to this directory's sidebar */
@@ -156,8 +154,6 @@ export interface GlobalSidebarConfig {
         maxDepth?: number
         /** Default collapsed state for root items */
         collapsed?: boolean
-        /** Global item order fallbacks */
-        itemOrder?: Record<string, number> | string[]
         /** Default hidden state for items if not specified */
         hidden?: boolean
         /** Global fallback for current-tree child collapsed behavior */
@@ -186,8 +182,6 @@ export interface EffectiveDirConfig {
     maxDepth: number
     /** Resolved collapsed state for this directory's item */
     collapsed: boolean
-    /** RESOLVED to Record<string, number>, default {} */
-    itemOrder: Record<string, number>
     /** Resolved groups, if any */
     groups: GroupConfig[]
     /** Resolved external links, if any */

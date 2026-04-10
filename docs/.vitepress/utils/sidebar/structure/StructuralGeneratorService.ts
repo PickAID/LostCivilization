@@ -230,7 +230,7 @@ export class StructuralGeneratorService {
 
         const allContent = [...flattenedContent, ...externalLinkItems];
 
-        const sortedContent = sortItems(allContent, rootConfig.itemOrder);
+        const sortedContent = sortItems(allContent);
 
         rootSection.items = sortedContent;
         return rootSection;
@@ -592,7 +592,7 @@ export class StructuralGeneratorService {
         const allItems = [...generatedItems, ...externalLinkItems];
 
         // 3. Sorting
-        const sortedItems = sortItems(allItems, currentScopeConfigWithBaseKey.itemOrder);
+        const sortedItems = sortItems(allItems);
         
         return sortedItems;
     }

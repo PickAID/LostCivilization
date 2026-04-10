@@ -107,13 +107,7 @@ async function processFileEntry(
     let link = `/${lang}/${relativeToLangRoot.replace(/\.md$/i, "")}`.replace(/\/+/g, "/");
     if (link.startsWith("//")) link = link.substring(1);
 
-    let priority = fileFrontmatter.priority;
-    if (priority === undefined && parentViewEffectiveConfig.itemOrder) {
-        const fileKey = entryName.replace(/\.md$/i, "");
-        if (parentViewEffectiveConfig.itemOrder.hasOwnProperty(fileKey)) {
-            priority = parentViewEffectiveConfig.itemOrder[fileKey];
-        }
-    }
+    const priority = fileFrontmatter.priority;
 
     return {
         text: title,

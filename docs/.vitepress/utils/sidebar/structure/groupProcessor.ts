@@ -137,8 +137,7 @@ export async function processGroup(
         const baseConfig = {
             ...parentDirEffectiveConfig,
             externalLinks: [],
-            groups: [],
-            itemOrder: {}
+            groups: []
         };
         
         groupEffectiveConfig = {
@@ -154,8 +153,7 @@ export async function processGroup(
             ),
             _baseRelativePathForChildren: '',
             _disableRootFlatten: false,
-            _activeMaxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || parentDirEffectiveConfig.maxDepth),
-            itemOrder: Array.isArray(groupFrontmatter.itemOrder) ? {} : (groupFrontmatter.itemOrder || {})
+            _activeMaxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || parentDirEffectiveConfig.maxDepth)
         };
     } catch (error) {
         groupEffectiveConfig = {
@@ -170,8 +168,7 @@ export async function processGroup(
             _disableRootFlatten: false,
             _activeMaxDepth: groupConfig.maxDepth ?? parentDirEffectiveConfig.maxDepth,
             externalLinks: [],
-            groups: [],
-            itemOrder: {}
+            groups: []
         };
     }
 

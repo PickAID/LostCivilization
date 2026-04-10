@@ -22,7 +22,6 @@ function createConfig(
         priority: overrides.priority ?? 0,
         maxDepth: overrides.maxDepth ?? 0,
         collapsed: overrides.collapsed ?? false,
-        itemOrder: overrides.itemOrder ?? {},
         groups: overrides.groups ?? [],
         externalLinks: overrides.externalLinks ?? [],
         useChildrenCollapsed: normalizeUseChildrenCollapsed(
