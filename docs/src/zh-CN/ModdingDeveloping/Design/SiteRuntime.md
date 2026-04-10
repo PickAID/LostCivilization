@@ -2,6 +2,7 @@
 title: 现场运行态
 description: 存档持久化数据、活跃运行态、区块缓存和客户端同步的设计边界。
 priority: 30
+hidden: false
 ---
 
 # 现场运行态 {#site-runtime}

@@ -1,7 +1,10 @@
 ---
 title: Site Runtime
-description: Forge-side implementation contract for site runtime, including the world ledger, chunk-side data, sync, and save checkpoints.
+description: >-
+  Forge-side implementation contract for site runtime, including the world
+  ledger, chunk-side data, sync, and save checkpoints.
 priority: 30
+hidden: false
 ---
 
 # Site runtime implementation {#site-runtime-implementation}

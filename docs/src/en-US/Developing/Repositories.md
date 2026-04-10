@@ -1,7 +1,10 @@
 ---
 title: Repositories
-description: How the current single workspace is managed, and when docs, pack, and Java runtime should split later.
-priority: 30
+description: >-
+  How the current single workspace is managed, and when docs, pack, and Java
+  runtime should split later.
+priority: 0
+hidden: false
 ---
 
 # Repositories {#repositories}

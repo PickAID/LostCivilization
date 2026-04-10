@@ -58,7 +58,6 @@ export interface SidebarLibConfig {
  * @private
  */
 export const DEFAULT_SIDEBAR_CACHE_DIR = "./.cache/sidebar";
-const SIDEBAR_CONFIG_IGNORED_DIRECTORIES = new Set([".metadata", ".archive"]);
 
 const defaultConfig: Omit<Required<SidebarLibConfig>, "languages"> = {
     rootDir: process.cwd(),
@@ -223,15 +222,6 @@ function getFileCachePath(lang: string): string {
     return resolve(cacheDir, `${getCacheKey(lang)}.json`);
 }
 
-function getVitepressTransformedSidebarCachePath(lang: string): string {
-    const config = getConfig();
-    return resolve(
-        config.rootDir,
-        ".vitepress/cache",
-        `${getCacheKey(lang)}.json`,
-    );
-}
-
 function getNewestMatchingMtime(
     rootPath: string,
     matcher: (fileName: string) => boolean
@@ -284,16 +274,15 @@ function getNewestDocsMtime(lang: string): number {
     );
 }
 
-function getNewestSidebarConfigMtime(lang: string): number {
+function getGlobalConfigMtime(): number {
     const config = getConfig();
-    const sidebarConfigPath = resolve(
-        config.rootDir,
-        ".vitepress/config/sidebar",
-        lang
-    );
-    return getNewestMatchingMtime(sidebarConfigPath, (name) =>
-        name.toLowerCase().endsWith(".json")
-    );
+    const globalConfigPath = resolve(config.rootDir, config.docsDir, ".sidebarrc.yml");
+
+    try {
+        return statSync(globalConfigPath).mtime.getTime();
+    } catch {
+        return 0;
+    }
 }
 
 export function isSidebarCacheStale(lang: string): boolean {
@@ -301,49 +290,6 @@ export function isSidebarCacheStale(lang: string): boolean {
     return !isFileCacheValid(lang);
 }
 
-export function listSidebarConfigFiles(): string[] {
-    const config = getConfig();
-    const sidebarConfigPath = resolve(
-        config.rootDir,
-        ".vitepress/config/sidebar"
-    );
-    const results: string[] = [];
-
-    if (!existsSync(sidebarConfigPath)) {
-        return results;
-    }
-
-    const queue: string[] = [sidebarConfigPath];
-    while (queue.length > 0) {
-        const currentPath = queue.pop() as string;
-        let entries: any[] = [];
-
-        try {
-            entries = readdirSync(currentPath, { withFileTypes: true }) as any[];
-        } catch {
-            continue;
-        }
-
-        for (const entry of entries) {
-            const entryName = String(entry.name);
-            const entryPath = resolve(currentPath, entryName);
-
-            if (entry.isDirectory()) {
-                if (SIDEBAR_CONFIG_IGNORED_DIRECTORIES.has(entryName)) {
-                    continue;
-                }
-                queue.push(entryPath);
-                continue;
-            }
-
-            if (entry.isFile() && entryName.endsWith(".json")) {
-                results.push(entryPath);
-            }
-        }
-    }
-
-    return results;
-}
 
 function isFileCacheValid(lang: string): boolean {
     const config = getConfig();
@@ -363,12 +309,8 @@ function isFileCacheValid(lang: string): boolean {
 
         const cacheMtime = cacheStats.mtime.getTime();
         const newestDocsMtime = getNewestDocsMtime(lang);
-        if (newestDocsMtime > cacheMtime) {
-            return false;
-        }
-
-        const newestSidebarConfigMtime = getNewestSidebarConfigMtime(lang);
-        if (newestSidebarConfigMtime > cacheMtime) {
+        const globalConfigMtime = getGlobalConfigMtime();
+        if (Math.max(newestDocsMtime, globalConfigMtime) > cacheMtime) {
             return false;
         }
 
@@ -487,39 +429,6 @@ function filterHiddenItems(items: any[]): any[] {
         });
 }
 
-function checkGeneratedFallback(lang: string): any | null {
-    const config = getConfig();
-    const generatedPath = resolve(
-        config.rootDir,
-        ".vitepress/config/generated",
-        `sidebar_${lang || "root"}.json`
-    );
-
-    if (existsSync(generatedPath)) {
-        try {
-            const content = readFileSync(generatedPath, "utf-8");
-            const data = JSON.parse(content);
-
-            if (config.debug) {
-                console.log(
-                    `[SidebarLib] Using generated fallback for ${lang}`
-                );
-            }
-
-            return data;
-        } catch (error) {
-            if (config.debug) {
-                console.warn(
-                    `[SidebarLib] Error reading generated fallback:`,
-                    error
-                );
-            }
-        }
-    }
-
-    return null;
-}
-
 function _getSidebarSyncInternal(lang: string): Record<string, any[]> {
     if (!currentConfig) {
         console.warn(`[SidebarLib] No configuration found. Auto-initializing with fallback config.`);
@@ -545,13 +454,6 @@ function _getSidebarSyncInternal(lang: string): Record<string, any[]> {
         memoryCache.set(cacheKey, { data: fileCache, timestamp: Date.now() });
         return fileCache;
     }
-    const fallback = checkGeneratedFallback(lang);
-    if (fallback) {
-        memoryCache.set(cacheKey, { data: fallback, timestamp: Date.now() });
-        writeFileCache(lang, fallback);
-        return fallback;
-    }
-
     if (config.debug) {
         console.warn(
             `[SidebarLib] No cache available for ${lang}, generating asynchronously...`
@@ -719,20 +621,6 @@ export function clearCache(lang?: string): void {
                 }
             }
         }
-
-        const vitepressCachePath = getVitepressTransformedSidebarCachePath(lang);
-        if (existsSync(vitepressCachePath)) {
-            try {
-                unlinkSync(vitepressCachePath);
-            } catch (error) {
-                if (config.debug) {
-                    console.warn(
-                        `[SidebarLib] Error clearing VitePress sidebar cache:`,
-                        error
-                    );
-                }
-            }
-        }
     } else {
         memoryCache.clear();
 
@@ -749,25 +637,6 @@ export function clearCache(lang?: string): void {
                 if (config.debug) {
                     console.warn(
                         `[SidebarLib] Error clearing cache directory:`,
-                        error
-                    );
-                }
-            }
-        }
-
-        const vitepressCacheDir = resolve(config.rootDir, ".vitepress/cache");
-        if (existsSync(vitepressCacheDir)) {
-            try {
-                const files = readdirSync(vitepressCacheDir);
-                for (const file of files) {
-                    if (file.startsWith("sidebar_") && file.endsWith(".json")) {
-                        unlinkSync(resolve(vitepressCacheDir, file));
-                    }
-                }
-            } catch (error) {
-                if (config.debug) {
-                    console.warn(
-                        `[SidebarLib] Error clearing VitePress cache directory:`,
                         error
                     );
                 }

@@ -2,6 +2,7 @@
 title: 共鸣
 description: 共鸣阶段的实现契约，说明类型结构、纯判定约束、tooltip 边界和最小测试集。
 priority: 40
+hidden: false
 ---
 
 # 共鸣实现 {#resonance-implementation}

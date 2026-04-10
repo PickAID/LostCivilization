@@ -1,7 +1,8 @@
 ---
-title: 环境准备
+title: 环境搭建
 description: 当前 PrismLauncher 实例下的工作区规则、前置条件和文档命令。
-priority: 10
+priority: 0
+hidden: false
 ---
 
 # 环境准备 {#environment-setup}

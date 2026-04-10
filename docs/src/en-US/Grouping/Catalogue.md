@@ -1,7 +1,10 @@
 ---
 title: Catalogue
-description: Grouping rules for systems, mods, and content slices, used to control first-version budget and expansion order.
-priority: -100
+description: >-
+  Grouping rules for systems, mods, and content slices, used to control
+  first-version budget and expansion order.
+priority: 0
+hidden: false
 ---
 
 # Grouping {#grouping}

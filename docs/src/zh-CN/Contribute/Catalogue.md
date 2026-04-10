@@ -2,6 +2,7 @@
 title: 目录
 description: 贡献入口，说明当前工作区下的环境规则和写作标准。
 priority: -100
+hidden: false
 ---
 
 # 贡献 {#contribution}

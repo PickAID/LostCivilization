@@ -2,6 +2,7 @@
 title: 目录
 description: 当前工作区结构、责任划分和开发入口的总索引。
 priority: 10
+hidden: false
 ---
 
 # 开发 {#development}

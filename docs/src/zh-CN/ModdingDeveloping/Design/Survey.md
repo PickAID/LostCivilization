@@ -2,6 +2,7 @@
 title: 勘探
 description: 说明前期发现与正式勘探怎么分开、正式记录怎么写入存档持久化数据，以及新增内容需要补齐哪些定义。
 priority: 10
+hidden: false
 ---
 
 # 勘探 {#survey}

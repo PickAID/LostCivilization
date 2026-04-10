@@ -1,7 +1,10 @@
 ---
 title: Resonance
-description: Implementation contract for resonance, covering type skeletons, pure evaluation, tooltip boundaries, and the minimum test matrix.
+description: >-
+  Implementation contract for resonance, covering type skeletons, pure
+  evaluation, tooltip boundaries, and the minimum test matrix.
 priority: 40
+hidden: false
 ---
 
 # Resonance implementation {#resonance-implementation}

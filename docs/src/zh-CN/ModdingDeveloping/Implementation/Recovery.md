@@ -2,6 +2,7 @@
 title: 回收
 description: 回收阶段的 Forge 实现契约，包含玩家长期知识迁移、遗物快照和 tooltip 读取规则。
 priority: 50
+hidden: false
 ---
 
 # 回收实现 {#recovery-implementation}

@@ -1,7 +1,8 @@
 ---
 title: Recovery
-description: Defines long-term knowledge, item snapshots, and tooltip read boundaries.
+description: 'Defines long-term knowledge, item snapshots, and tooltip read boundaries.'
 priority: 50
+hidden: false
 ---
 
 # Recovery {#recovery}

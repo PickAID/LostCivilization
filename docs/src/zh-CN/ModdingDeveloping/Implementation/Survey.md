@@ -2,6 +2,7 @@
 title: 勘探
 description: 前期发现与正式勘探的 Forge 实现契约，包含原版刷扫链路、正式写入存档持久化数据的入口和玩家短标记边界。
 priority: 10
+hidden: false
 ---
 
 # 勘探实现 {#survey-implementation}

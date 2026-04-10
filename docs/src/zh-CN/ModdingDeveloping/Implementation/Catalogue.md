@@ -1,7 +1,8 @@
 ---
 title: 目录
 description: Forge 侧遗址系统的实现目录，明确数据归属、生命周期钩子和第一批待实现对象。
-priority: -100
+priority: 0
+hidden: false
 ---
 
 # 模组实现目录 {#modding-implementation-catalogue}

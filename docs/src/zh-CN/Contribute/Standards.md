@@ -1,7 +1,8 @@
 ---
 title: 规范
 description: 贡献者在当前文档工作区中应遵守的命名、锚点、写法和边界规则。
-priority: 20
+priority: 0
+hidden: false
 ---
 
 # 规范 {#standards}

@@ -2,6 +2,7 @@
 title: 架构
 description: 项目的组织方式——外部模组、整合包工作区、文档站。
 priority: 20
+hidden: false
 ---
 
 # 架构 {#architecture}

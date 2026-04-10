@@ -1,7 +1,10 @@
 ---
 title: Activation
-description: Design definition of ActivationService, the adapter layer, and the ownership handoff from formal site reference to runtime state.
+description: >-
+  Design definition of ActivationService, the adapter layer, and the ownership
+  handoff from formal site reference to runtime state.
 priority: 20
+hidden: false
 ---
 
 # Activation {#activation}

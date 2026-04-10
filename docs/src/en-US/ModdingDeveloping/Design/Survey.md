@@ -1,7 +1,10 @@
 ---
 title: Survey
-description: Defines the boundary between early discovery and formal survey, node rules, formal ledger entry order, and registration requirements.
+description: >-
+  Defines the boundary between early discovery and formal survey, node rules,
+  formal ledger entry order, and registration requirements.
 priority: 10
+hidden: false
 ---
 
 # Survey {#survey}

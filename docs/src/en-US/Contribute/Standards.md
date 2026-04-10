@@ -1,7 +1,10 @@
 ---
 title: Standards
-description: Naming, anchors, writing rules, and boundary rules for contributors in the current docs workspace.
-priority: 20
+description: >-
+  Naming, anchors, writing rules, and boundary rules for contributors in the
+  current docs workspace.
+priority: 0
+hidden: false
 ---
 
 # Standards {#standards}

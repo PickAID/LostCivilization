@@ -20,8 +20,7 @@ import { ConfigReaderService } from '../config';
 import { generateLink } from './linkGenerator';
 import { sortItems } from './itemSorter';
 import { normalizePathSeparators } from '../shared/objectUtils';
-import { normalizeCollapseControl } from './collapseControl';
-import { normalizeViewControl } from './viewControl';
+import { normalizeUseChildrenCollapsed } from './useChildrenCollapsed';
 import { resolveSidebarConfigFilePath } from "../shared/sidebarFileConventions";
 
 /**
@@ -150,16 +149,12 @@ export async function processGroup(
             priority: groupConfig.priority ?? (groupFrontmatter.priority || 0),
             maxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || parentDirEffectiveConfig.maxDepth),
             path: groupContentAbsPath,
-            viewControl: normalizeViewControl(
-                groupFrontmatter.viewControl ?? baseConfig.viewControl,
-                baseConfig.viewControl.mode
-            ),
-            collapseControl: normalizeCollapseControl(
-                groupFrontmatter.collapseControl ?? baseConfig.collapseControl
+            useChildrenCollapsed: normalizeUseChildrenCollapsed(
+                groupFrontmatter.useChildrenCollapsed ?? baseConfig.useChildrenCollapsed
             ),
             _baseRelativePathForChildren: '',
-            _controlRelativePath: '',
             _disableRootFlatten: false,
+            _activeMaxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || parentDirEffectiveConfig.maxDepth),
             itemOrder: Array.isArray(groupFrontmatter.itemOrder) ? {} : (groupFrontmatter.itemOrder || {})
         };
     } catch (error) {
@@ -170,11 +165,10 @@ export async function processGroup(
             priority: groupConfig.priority ?? 0,
             maxDepth: groupConfig.maxDepth ?? parentDirEffectiveConfig.maxDepth,
             path: groupContentAbsPath,
-            viewControl: parentDirEffectiveConfig.viewControl,
-            collapseControl: parentDirEffectiveConfig.collapseControl,
+            useChildrenCollapsed: parentDirEffectiveConfig.useChildrenCollapsed,
             _baseRelativePathForChildren: '',
-            _controlRelativePath: '',
             _disableRootFlatten: false,
+            _activeMaxDepth: groupConfig.maxDepth ?? parentDirEffectiveConfig.maxDepth,
             externalLinks: [],
             groups: [],
             itemOrder: {}
@@ -186,16 +180,12 @@ export async function processGroup(
         title: groupTitle,
         priority: groupConfig.priority ?? groupEffectiveConfig.priority ?? 0,
         maxDepth: groupConfig.maxDepth ?? groupEffectiveConfig.maxDepth,
-        viewControl: normalizeViewControl(
-            groupEffectiveConfig.viewControl,
-            groupEffectiveConfig.viewControl.mode
-        ),
-        collapseControl: normalizeCollapseControl(
-            groupEffectiveConfig.collapseControl
+        useChildrenCollapsed: normalizeUseChildrenCollapsed(
+            groupEffectiveConfig.useChildrenCollapsed
         ),
         _baseRelativePathForChildren: '',
-        _controlRelativePath: '',
         _disableRootFlatten: false,
+        _activeMaxDepth: groupConfig.maxDepth ?? groupEffectiveConfig.maxDepth,
     };
 
     const groupItems = await recursiveViewGenerator(

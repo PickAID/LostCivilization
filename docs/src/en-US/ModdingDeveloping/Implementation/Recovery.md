@@ -1,7 +1,10 @@
 ---
 title: Recovery
-description: Forge-side implementation contract for long-term player knowledge, relic snapshots, and tooltip read rules.
+description: >-
+  Forge-side implementation contract for long-term player knowledge, relic
+  snapshots, and tooltip read rules.
 priority: 50
+hidden: false
 ---
 
 # Recovery implementation {#recovery-implementation}

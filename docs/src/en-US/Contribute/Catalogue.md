@@ -2,6 +2,7 @@
 title: Catalogue
 description: Contribution entry point for workspace rules and writing standards.
 priority: -100
+hidden: false
 ---
 
 # Contribution {#contribution}

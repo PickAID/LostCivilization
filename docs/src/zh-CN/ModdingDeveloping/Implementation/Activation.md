@@ -2,6 +2,7 @@
 title: 激活
 description: 激活阶段的 Forge 实现契约，包含 ActivationService、适配器、待处理引用消费和收尾钩子。
 priority: 20
+hidden: false
 ---
 
 # 激活实现 {#activation-implementation}

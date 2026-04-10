@@ -2,6 +2,7 @@
 title: 共鸣
 description: 从设计角度定义共鸣的输入、输出和消费边界，避免判定逻辑分散到 runtime、回收和 tooltip。
 priority: 40
+hidden: false
 ---
 
 # 共鸣 {#resonance}

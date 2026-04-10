@@ -1,7 +1,8 @@
 ---
 title: Architecture
-description: How the project is structured — external mod, in-instance pack, docs.
-priority: 20
+description: 'How the project is structured — external mod, in-instance pack, docs.'
+priority: 0
+hidden: false
 ---
 
 # Architecture {#architecture}

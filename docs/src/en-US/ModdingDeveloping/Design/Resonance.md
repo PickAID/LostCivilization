@@ -1,7 +1,10 @@
 ---
 title: Resonance
-description: Defines resonance inputs, outputs, and consumption boundaries, so evaluation logic does not spread into runtime, recovery, and tooltip.
+description: >-
+  Defines resonance inputs, outputs, and consumption boundaries, so evaluation
+  logic does not spread into runtime, recovery, and tooltip.
 priority: 40
+hidden: false
 ---
 
 # Resonance {#resonance}

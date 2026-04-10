@@ -2,6 +2,7 @@
 title: 激活
 description: 从设计角度定义 ActivationService、适配器层和正式遗址引用到运行态的所有权移交。
 priority: 20
+hidden: false
 ---
 
 # 激活 {#activation}

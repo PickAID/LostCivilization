@@ -1,7 +1,11 @@
 ---
 title: Activation
-description: Forge-side implementation contract for activation, including ActivationService, adapters, pending-reference consumption, and teardown hooks.
+description: >-
+  Forge-side implementation contract for activation, including
+  ActivationService, adapters, pending-reference consumption, and teardown
+  hooks.
 priority: 20
+hidden: false
 ---
 
 # Activation implementation {#activation-implementation}

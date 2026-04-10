@@ -1,7 +1,10 @@
 ---
 title: Catalogue
-description: Implementation index for the Forge-side ruin system, defining data ownership, lifecycle hooks, and the first batch of recommended objects.
-priority: -100
+description: >-
+  Implementation index for the Forge-side ruin system, defining data ownership,
+  lifecycle hooks, and the first batch of recommended objects.
+priority: 0
+hidden: false
 ---
 
 # Modding implementation catalogue {#modding-implementation-catalogue}

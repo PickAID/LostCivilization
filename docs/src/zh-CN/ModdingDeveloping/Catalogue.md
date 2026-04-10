@@ -1,7 +1,8 @@
 ---
 title: 目录
 description: Forge 侧遗址系统的设计与实现入口，聚焦生命周期、数据归属和运行时结构。
-priority: -100
+priority: 0
+hidden: false
 ---
 
 # 模组开发 {#modding-development}

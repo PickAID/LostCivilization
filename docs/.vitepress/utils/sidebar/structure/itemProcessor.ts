@@ -7,10 +7,10 @@ import { generateLink } from "./linkGenerator";
 import { generatePathKey } from "./pathKeyGenerator";
 import { normalizePathSeparators } from "../shared/objectUtils";
 import {
+    createChildTreeContext,
     joinSidebarBaseRelativePath,
-    resolveChildViewTransition,
-} from "./viewControl";
-import { resolveChildCollapsedState } from "./collapseControl";
+    resolveDisplayedCollapsedState,
+} from "./useChildrenCollapsed";
 import {
     isSidebarItemExcludedFileName,
     resolveSidebarConfigFilePath,
@@ -172,10 +172,9 @@ async function createRootLinkItem(
         text: dirEffectiveConfig.title,
         link: linkToSubRoot,
         items: [],
-        collapsed: resolveChildCollapsedState(
+        collapsed: resolveDisplayedCollapsedState(
             parentViewEffectiveConfig,
             dirEffectiveConfig,
-            itemRelativePathKey,
         ),
         _priority: dirEffectiveConfig.priority,
         _relativePathKey: itemRelativePathKey,
@@ -280,16 +279,15 @@ async function processDirectoryEntry(
 ): Promise<SidebarItem | null> {
     let subItems: SidebarItem[] = [];
 
-    const childViewTransition = resolveChildViewTransition(
+    const childTreeContext = createChildTreeContext(
         parentViewEffectiveConfig,
         dirEffectiveConfig,
-        itemRelativePathKey,
         currentLevelDepth
     );
 
-    if (childViewTransition.canRecurse) {
+    if (childTreeContext.canRecurse) {
         const subDirContextConfig = {
-            ...childViewTransition.nextConfig,
+            ...childTreeContext.nextConfig,
             _baseRelativePathForChildren: joinSidebarBaseRelativePath(
                 parentViewEffectiveConfig._baseRelativePathForChildren,
                 itemRelativePathKey
@@ -300,7 +298,7 @@ async function processDirectoryEntry(
             normalizedItemAbsPath,
             subDirContextConfig,
             lang,
-            childViewTransition.nextDepth,
+            childTreeContext.nextDepth,
             isDevMode
         );
     }
@@ -331,10 +329,9 @@ async function processDirectoryEntry(
         text: directoryTitle,
         link: linkToDir || undefined,
         items: subItems.length > 0 ? subItems : [],
-        collapsed: resolveChildCollapsedState(
+        collapsed: resolveDisplayedCollapsedState(
             parentViewEffectiveConfig,
             dirEffectiveConfig,
-            itemRelativePathKey,
         ),
         _priority: dirEffectiveConfig.priority,
         _relativePathKey: itemRelativePathKey,

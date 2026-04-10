@@ -1,7 +1,10 @@
 ---
 title: Catalogue
-description: Design index for the ruin system, defining objects, state machines, and data boundaries.
-priority: -100
+description: >-
+  Design index for the ruin system, defining objects, state machines, and data
+  boundaries.
+priority: 0
+hidden: false
 ---
 
 # Modding design catalogue {#modding-design-catalogue}

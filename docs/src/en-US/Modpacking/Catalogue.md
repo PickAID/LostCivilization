@@ -1,7 +1,10 @@
 ---
 title: Catalogue
-description: Pack-side index covering the current instance snapshot, script and datapack boundaries, the current TaCZ setup, and first-slice gaps.
-priority: -100
+description: >-
+  Pack-side index covering the current instance snapshot, script and datapack
+  boundaries, the current TaCZ setup, and first-slice gaps.
+priority: 0
+hidden: false
 ---
 
 # Modpack Build {#modpack-build}

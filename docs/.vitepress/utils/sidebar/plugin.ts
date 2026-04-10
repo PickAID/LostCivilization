@@ -23,7 +23,6 @@ import {
     clearCache,
     getConfig,
     isSidebarCacheStale,
-    listSidebarConfigFiles,
     type SidebarLibConfig,
 } from "./lib";
 import { SIDEBAR_CONFIG_FILE_CANDIDATES } from "./shared/sidebarFileConventions";
@@ -44,7 +43,6 @@ export interface SidebarPluginConfig extends SidebarLibConfig {
     /**
      * When true, adding or removing an index file (index.md / sidebarIndex.md / root.md)
      * automatically triggers a server restart to rebuild the sidebar.
-     * When false (default), use the VS Code extension "Sync Sidebar" button instead.
      */
     hotRestartOnIndexChange?: boolean;
 }
@@ -84,10 +82,6 @@ export function sidebarPlugin(config: SidebarPluginConfig): Plugin {
     const hotRestartOnIndexChange = config.hotRestartOnIndexChange ?? false;
 
     const docsPath = resolve(finalConfig.rootDir, finalConfig.docsDir);
-    const configPath = resolve(
-        finalConfig.rootDir,
-        ".vitepress/config/sidebar"
-    );
     const configuredLanguages = new Set(finalConfig.languages);
 
     function normalizeWatchedPath(filePath: string): string {
@@ -115,22 +109,7 @@ export function sidebarPlugin(config: SidebarPluginConfig): Plugin {
             return [docsLanguage];
         }
 
-        const configLanguage = extractLanguageFromPath(filePath, configPath);
-        if (configLanguage) {
-            return [configLanguage];
-        }
-
         return finalConfig.languages;
-    }
-
-    function isUserSidebarJson(filePath: string): boolean {
-        const normalizedPath = filePath.replace(/\\/g, "/");
-        return (
-            normalizedPath.includes("/.vitepress/config/sidebar/") &&
-            normalizedPath.endsWith(".json") &&
-            !normalizedPath.includes("/.vitepress/config/sidebar/.metadata/") &&
-            !normalizedPath.includes("/.vitepress/config/sidebar/.archive/")
-        );
     }
 
     async function generateSidebarsForAllLanguages() {
@@ -269,7 +248,6 @@ export function sidebarPlugin(config: SidebarPluginConfig): Plugin {
                     }
                 }
             );
-
             if (hotRestartOnIndexChange) {
                 const handleSidebarSourceEvent = (filePath: string) => {
                     if (Date.now() < ignoreWatcherEventsUntil) {
@@ -287,10 +265,6 @@ export function sidebarPlugin(config: SidebarPluginConfig): Plugin {
                 server.watcher.on("unlink", handleSidebarSourceEvent);
             }
 
-            const jsonConfigFiles = listSidebarConfigFiles();
-            for (const jsonFile of jsonConfigFiles) {
-                server.watcher.add(jsonFile);
-            }
         },
     };
 }

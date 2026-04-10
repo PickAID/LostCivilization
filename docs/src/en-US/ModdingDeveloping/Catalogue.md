@@ -1,7 +1,10 @@
 ---
 title: Catalogue
-description: Design and implementation entry point for the Forge-side ruin system, focused on lifecycle, data placement, and runtime structure.
-priority: -100
+description: >-
+  Design and implementation entry point for the Forge-side ruin system, focused
+  on lifecycle, data placement, and runtime structure.
+priority: 0
+hidden: false
 ---
 
 # Modding development {#modding-development}

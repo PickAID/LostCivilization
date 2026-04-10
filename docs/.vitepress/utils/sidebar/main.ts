@@ -9,13 +9,11 @@ import {
 } from "./types";
 import { ConfigReaderService } from "./config";
 import { StructuralGeneratorService } from "./structure";
-import { JsonConfigSynchronizerService } from "./overrides";
 import { GitBookService } from "./external";
 import { GitBookParserService } from "./external/GitBookParserService";
 import { NodeFileSystem, type FileSystem } from "./shared/fileSystem";
 import { normalizePathSeparators } from "./shared/objectUtils";
-import { normalizeCollapseControl } from "./structure/collapseControl";
-import { normalizeViewControl } from "./structure/viewControl";
+import { normalizeUseChildrenCollapsed } from "./structure/useChildrenCollapsed";
 import {
     SIDEBAR_CONFIG_FILE_CANDIDATES,
     resolveSidebarConfigFilePath,
@@ -53,21 +51,6 @@ function filterGroupedContent(items: any[], groupPaths: Set<string>): any[] {
     }).filter(item => item !== null);
 }
 
-function mergeStandaloneRootPropertiesPreservingChildren(
-    targetItem: SidebarItem,
-    standaloneItem: SidebarItem
-): void {
-    const preservedChildren = targetItem.items;
-    Object.assign(targetItem, standaloneItem);
-
-    if (preservedChildren !== undefined) {
-        targetItem.items = preservedChildren;
-    }
-}
-
-function cloneSidebarItemForStandaloneSync(item: SidebarItem): SidebarItem {
-    return JSON.parse(JSON.stringify(item)) as SidebarItem;
-}
 
 /**
  * @fileoverview Top-level orchestrator for the entire sidebar generation process.
@@ -78,7 +61,6 @@ function cloneSidebarItemForStandaloneSync(item: SidebarItem): SidebarItem {
  * - Apply configuration from index.md frontmatter and global configs
  * - Generate hierarchical sidebar structures
  * - Handle grouping and external content integration
- * - Apply JSON overrides and synchronization
  * - Output final sidebar configurations in VitePress-compatible format
  * 
  * @module SidebarMain
@@ -168,7 +150,7 @@ async function findAllRootIndexMdPaths(
 
 /**
  * Main orchestration function to generate all sidebars for all configured languages and roots.
- * It reads declarative configurations, generates a base structure, applies JSON overrides,
+ * It reads declarative markdown configurations, generates the sidebar structure,
  * and writes the final `sidebars.json` file in `SidebarMulti` format.
  *
  * @param {GenerateSidebarsOptions} options Configuration options for the generation process.
@@ -214,10 +196,6 @@ export async function generateSidebars(
             nodeFs,
             langGitbookPaths 
         );
-        const jsonSynchronizer = new JsonConfigSynchronizerService(
-            absDocsPath,
-            nodeFs
-        );
 
         const normalRootIndexMdPaths = await findAllRootIndexMdPaths(
             currentLanguagePath,
@@ -258,9 +236,9 @@ export async function generateSidebars(
             );
             effectiveConfig = {
                 ...effectiveConfig,
-                _baseRelativePathForChildren: "", 
-                _controlRelativePath: "",
+                _baseRelativePathForChildren: "",
                 _disableRootFlatten: false,
+                _activeMaxDepth: effectiveConfig.maxDepth,
             };
             
 
@@ -274,13 +252,7 @@ export async function generateSidebars(
                     isDevMode
                 );
 
-            const synchronizedItems = await jsonSynchronizer.synchronize(
-                rootKeyInSidebarMulti,
-                structuralItems, 
-                lang,
-                isDevMode,
-                langGitbookPaths 
-            );
+            const synchronizedItems = structuralItems;
 
             const groupItems: any[] = [];
             const groupPaths = new Set<string>();
@@ -322,16 +294,12 @@ export async function generateSidebars(
                             root: false,
                             priority: groupConfig.priority ?? (groupFrontmatter.priority || 0),
                             maxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || effectiveConfig.maxDepth),
-                            viewControl: normalizeViewControl(
-                                groupFrontmatter.viewControl ?? baseConfig.viewControl,
-                                baseConfig.viewControl.mode
-                            ),
-                            collapseControl: normalizeCollapseControl(
-                                groupFrontmatter.collapseControl ?? baseConfig.collapseControl
+                            useChildrenCollapsed: normalizeUseChildrenCollapsed(
+                                groupFrontmatter.useChildrenCollapsed ?? baseConfig.useChildrenCollapsed
                             ),
                             _baseRelativePathForChildren: '',
-                            _controlRelativePath: '',
                             _disableRootFlatten: false,
+                            _activeMaxDepth: groupConfig.maxDepth ?? (groupFrontmatter.maxDepth || effectiveConfig.maxDepth),
                             itemOrder: Array.isArray(groupFrontmatter.itemOrder) ? {} : (groupFrontmatter.itemOrder || {})
                         };
                     } catch (error) {
@@ -341,11 +309,10 @@ export async function generateSidebars(
                             root: false,
                             priority: groupConfig.priority ?? 0,
                             maxDepth: groupConfig.maxDepth ?? effectiveConfig.maxDepth,
-                            viewControl: effectiveConfig.viewControl,
-                            collapseControl: effectiveConfig.collapseControl,
+                            useChildrenCollapsed: effectiveConfig.useChildrenCollapsed,
                             _baseRelativePathForChildren: '',
-                            _controlRelativePath: '',
                             _disableRootFlatten: false,
+                            _activeMaxDepth: groupConfig.maxDepth ?? effectiveConfig.maxDepth,
                             externalLinks: [],
                             groups: [],
                             itemOrder: {}
@@ -360,13 +327,7 @@ export async function generateSidebars(
                         isDevMode
                     );
                     
-                    const groupSynchronizedItems = await jsonSynchronizer.synchronize(
-                        groupConfigKey,
-                        groupStructuralItems,
-                        lang,
-                        isDevMode,
-                        langGitbookPaths
-                    );
+                    const groupSynchronizedItems = groupStructuralItems;
                     
                     if (groupSynchronizedItems && groupSynchronizedItems.length > 0) {
                         const groupWrapper = {
@@ -404,160 +365,6 @@ export async function generateSidebars(
             }
         }
         
-        const processedFlattenedSections = new Set<string>();
-        const processedChildRootDecorations = new Set<string>();
-        
-        const searchForFlattenedRoots = async (items: any[], currentPath: string = ''): Promise<void> => {
-            if (!Array.isArray(items)) return;
-            
-            for (const item of items) {
-                if (item._isDirectory && item._relativePathKey) {
-                    const itemPath = currentPath + item._relativePathKey;
-                    const itemPathInDocs = normalizePathSeparators(
-                        path.join(currentLanguagePath, itemPath)
-                    );
-                    const itemIndexPath = await resolveSidebarConfigFilePath(
-                        nodeFs,
-                        itemPathInDocs,
-                    );
-                    
-                    try {
-                        if (await nodeFs.exists(itemIndexPath)) {
-                            const itemContent = await nodeFs.readFile(itemIndexPath);
-                            const itemFrontmatter = matter(itemContent).data;
-                            
-                            if (itemFrontmatter && itemFrontmatter.root === true) {
-                                const itemRootKey = `/${normalizePathSeparators(path.relative(absDocsPath, itemPathInDocs))}/`;
-                                const normalizedItemRootKey = itemRootKey.replace(/\/\/+/g, "/");
-                                
-                                if (!processedChildRootDecorations.has(normalizedItemRootKey)) {
-                                    const standaloneSection = [{
-                                        ...cloneSidebarItemForStandaloneSync(item),
-                                        _isRoot: true
-                                    }];
-                                    
-                                    const processedSection = await jsonSynchronizer.synchronize(
-                                        normalizedItemRootKey,
-                                        standaloneSection,
-                                        lang,
-                                        isDevMode,
-                                        langGitbookPaths
-                                    );
-                                    
-                                    if (processedSection && processedSection.length > 0) {
-                                        const processedItem = processedSection[0];
-                                        mergeStandaloneRootPropertiesPreservingChildren(item, processedItem);
-                                        
-                                        processedChildRootDecorations.add(normalizedItemRootKey);
-                                    }
-                                }
-                            }
-                        }
-                    } catch (e) {
-                    }
-                    
-                    if (item.items && Array.isArray(item.items)) {
-                        await searchForFlattenedRoots(item.items, itemPath);
-                    }
-                } else if (item.items && Array.isArray(item.items)) {
-                    await searchForFlattenedRoots(item.items, currentPath);
-                }
-            }
-        };
-        
-        for (const [sidebarKey, sidebarItems] of Object.entries(outputLangSidebar)) {
-            if (Array.isArray(sidebarItems) && sidebarItems.length === 1) {
-                const rootItem = sidebarItems[0];
-                if (rootItem._isRoot && rootItem.items && rootItem.items.length > 0) {
-                    const pathFromKey = sidebarKey.replace(/^\/+|\/+$/g, '');
-                    const sectionPathInDocs = normalizePathSeparators(
-                        path.join(absDocsPath, pathFromKey)
-                    );
-                    const sectionIndexPath = await resolveSidebarConfigFilePath(
-                        nodeFs,
-                        sectionPathInDocs,
-                    );
-                    
-                    try {
-                        if (await nodeFs.exists(sectionIndexPath)) {
-                            const sectionContent = await nodeFs.readFile(sectionIndexPath);
-                            const sectionFrontmatter = matter(sectionContent).data;
-                            
-                            if (sectionFrontmatter && sectionFrontmatter.root === true) {
-                                const normalizedSectionKey = sidebarKey.replace(/\/\/+/g, "/");
-                                
-                                if (!processedFlattenedSections.has(normalizedSectionKey)) {
-                                    const processedSection = await jsonSynchronizer.synchronize(
-                                        normalizedSectionKey,
-                                        sidebarItems,
-                                        lang,
-                                        isDevMode,
-                                        langGitbookPaths
-                                    );
-                                    
-                                    if (processedSection && processedSection.length > 0) {
-                                        outputLangSidebar[sidebarKey] = processedSection;
-                                        
-                                        processedFlattenedSections.add(normalizedSectionKey);
-                                    }
-                                }
-                            }
-                        }
-                    } catch (e) {
-                    }
-                    
-                    await searchForFlattenedRoots(rootItem.items, '');
-                    
-                    for (const childItem of rootItem.items) {
-                        if (childItem._isDirectory && childItem._relativePathKey) {
-                            const childPathInDocs = normalizePathSeparators(
-                                path.join(currentLanguagePath, childItem._relativePathKey)
-                            );
-                            const childIndexPath = await resolveSidebarConfigFilePath(
-                                nodeFs,
-                                childPathInDocs,
-                            );
-                            
-                            try {
-                                if (await nodeFs.exists(childIndexPath)) {
-                                    const childContent = await nodeFs.readFile(childIndexPath);
-                                    const childFrontmatter = matter(childContent).data;
-                                    
-                                    if (childFrontmatter && childFrontmatter.root === true) {
-                                        const childRootKey = `/${normalizePathSeparators(path.relative(absDocsPath, childPathInDocs))}/`;
-                                        const normalizedChildRootKey = childRootKey.replace(/\/\/+/g, "/");
-                                        
-                                        if (!processedChildRootDecorations.has(normalizedChildRootKey)) {
-                                            const standaloneSection = [{
-                                                ...cloneSidebarItemForStandaloneSync(childItem),
-                                                _isRoot: true
-                                            }];
-                                            
-                                            const processedSection = await jsonSynchronizer.synchronize(
-                                                normalizedChildRootKey,
-                                                standaloneSection,
-                                                lang,
-                                                isDevMode,
-                                                langGitbookPaths
-                                            );
-                                            
-                                            if (processedSection && processedSection.length > 0) {
-                                                const processedChild = processedSection[0];
-                                                mergeStandaloneRootPropertiesPreservingChildren(childItem, processedChild);
-                                                
-                                                processedChildRootDecorations.add(normalizedChildRootKey);
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (e) {
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         for (const gitbookDirAbsPath of langGitbookPaths) {
             const gitbookItems = await gitbookParserService.generateSidebarView(
                 gitbookDirAbsPath,

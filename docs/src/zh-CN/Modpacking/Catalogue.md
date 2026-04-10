@@ -1,7 +1,8 @@
 ---
 title: 目录
 description: pack 侧总索引，说明当前实例快照、脚本与数据包边界、TaCZ 现状和第一切片缺口。
-priority: -100
+priority: 0
+hidden: false
 ---
 
 # 整合包构建 {#modpack-build}

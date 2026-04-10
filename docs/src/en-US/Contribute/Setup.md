@@ -1,7 +1,10 @@
 ---
 title: Setup
-description: Workspace rules, prerequisites, and documentation commands for the current PrismLauncher instance.
-priority: 10
+description: >-
+  Workspace rules, prerequisites, and documentation commands for the current
+  PrismLauncher instance.
+priority: 0
+hidden: false
 ---
 
 # Setup {#environment-setup}

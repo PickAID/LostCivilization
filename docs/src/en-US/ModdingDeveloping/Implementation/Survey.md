@@ -1,7 +1,11 @@
 ---
 title: Survey
-description: Forge-side implementation contract for early discovery and formal survey, including the vanilla brush chain, formal ledger entry, and player short-marker boundaries.
+description: >-
+  Forge-side implementation contract for early discovery and formal survey,
+  including the vanilla brush chain, formal ledger entry, and player
+  short-marker boundaries.
 priority: 10
+hidden: false
 ---
 
 # Survey implementation {#survey-implementation}

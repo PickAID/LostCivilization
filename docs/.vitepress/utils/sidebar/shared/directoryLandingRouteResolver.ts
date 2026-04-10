@@ -8,17 +8,9 @@ type SidebarItemLike = {
     _relativePathKey?: string;
 };
 
-type SidebarCacheFile = Record<string, SidebarItemLike[]>;
-
+type SidebarEntryMap = Record<string, SidebarItemLike[]>;
+type SidebarSource = SidebarEntryMap | SidebarItemLike[] | false | undefined;
 type TrailingSlashMode = "preserve" | "ensure" | "strip";
-
-const sidebarCacheModules = import.meta.glob(
-    "../../../../.cache/sidebar/sidebar_*.json",
-    {
-        eager: true,
-        import: "default",
-    },
-) as Record<string, SidebarCacheFile>;
 
 const landingFileSegments = DIRECTORY_LANDING_FILE_CANDIDATES.map((fileName) => ({
     fileName,
@@ -32,6 +24,9 @@ const nonIndexLandingSegments = landingFileSegments.filter(
 const landingFileNameSet = new Set(
     DIRECTORY_LANDING_FILE_CANDIDATES.map((fileName) => fileName.toLowerCase()),
 );
+
+let directoryLandingRoutes = new Map<string, string>();
+let landingPathSet = new Set<string>();
 
 function normalizeRoutePath(
     path: string,
@@ -149,43 +144,55 @@ function walkSidebarItems(
     }
 }
 
-function buildDirectoryLandingRoutes() {
+function getSidebarEntries(sidebar: SidebarSource): [string, SidebarItemLike[]][] {
+    if (!sidebar) {
+        return [];
+    }
+
+    if (Array.isArray(sidebar)) {
+        return [["/", sidebar]];
+    }
+
+    if (typeof sidebar === "object") {
+        return Object.entries(sidebar).filter((entry): entry is [string, SidebarItemLike[]] =>
+            Array.isArray(entry[1]),
+        );
+    }
+
+    return [];
+}
+
+function buildDirectoryLandingRoutes(sidebar: SidebarSource) {
     const routes = new Map<string, string>();
 
-    for (const sidebarFile of Object.values(sidebarCacheModules)) {
-        for (const [basePath, items] of Object.entries(sidebarFile)) {
-            if (!Array.isArray(items)) continue;
-
-            const normalizedBasePath = normalizeRoutePath(basePath, "ensure");
-            const rootLandingPath = findRootLandingPath(items, normalizedBasePath);
-            if (rootLandingPath) {
-                setDirectoryLandingRoute(
-                    routes,
-                    normalizedBasePath,
-                    rootLandingPath,
-                );
-            }
-
-            walkSidebarItems(items, (item) => {
-                if (!item._isDirectory) return;
-
-                const landingPath = normalizeInternalLink(item.link);
-                if (!landingPath) return;
-
-                setDirectoryLandingRoute(
-                    routes,
-                    pathToDirectory(landingPath),
-                    landingPath,
-                );
-            });
+    for (const [basePath, items] of getSidebarEntries(sidebar)) {
+        const normalizedBasePath = normalizeRoutePath(basePath, "ensure");
+        const rootLandingPath = findRootLandingPath(items, normalizedBasePath);
+        if (rootLandingPath) {
+            setDirectoryLandingRoute(routes, normalizedBasePath, rootLandingPath);
         }
+
+        walkSidebarItems(items, (item) => {
+            if (!item._isDirectory) return;
+
+            const landingPath = normalizeInternalLink(item.link);
+            if (!landingPath) return;
+
+            setDirectoryLandingRoute(
+                routes,
+                pathToDirectory(landingPath),
+                landingPath,
+            );
+        });
     }
 
     return routes;
 }
 
-const directoryLandingRoutes = buildDirectoryLandingRoutes();
-const landingPathSet = new Set(directoryLandingRoutes.values());
+export function setDirectoryLandingSidebar(sidebar: SidebarSource) {
+    directoryLandingRoutes = buildDirectoryLandingRoutes(sidebar);
+    landingPathSet = new Set(directoryLandingRoutes.values());
+}
 
 function resolveLandingPath(path: string) {
     return directoryLandingRoutes.get(normalizeRoutePath(path, "ensure")) ?? null;

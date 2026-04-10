@@ -1,7 +1,8 @@
 ---
 title: 目录
 description: 遗址系统的设计目录，定义对象、状态机和数据边界。
-priority: -100
+priority: 0
+hidden: false
 ---
 
 # 模组设计目录 {#modding-design-catalogue}

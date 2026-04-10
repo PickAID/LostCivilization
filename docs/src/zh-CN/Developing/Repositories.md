@@ -2,6 +2,7 @@
 title: 仓库
 description: 当前单工作区的管理方式，以及后续拆分文档、整合和 Java 运行时的条件。
 priority: 30
+hidden: false
 ---
 
 # 仓库 {#repositories}

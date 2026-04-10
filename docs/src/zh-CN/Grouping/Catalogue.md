@@ -1,7 +1,8 @@
 ---
 title: 目录
 description: 关于系统、模组和内容的分组规则，用于控制第一版预算和扩张顺序。
-priority: -100
+priority: 0
+hidden: false
 ---
 
 # 分组 {#grouping}

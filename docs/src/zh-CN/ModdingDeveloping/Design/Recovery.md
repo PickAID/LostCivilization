@@ -2,6 +2,7 @@
 title: 回收
 description: 从设计角度定义长期知识、遗物快照和 tooltip 读取边界。
 priority: 50
+hidden: false
 ---
 
 # 回收 {#recovery}

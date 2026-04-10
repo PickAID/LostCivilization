@@ -21,9 +21,9 @@ import { ItemProcessorFunction, RecursiveViewGeneratorFunction } from './groupPr
 import { processItem } from './itemProcessor';
 import { sortItems } from './itemSorter';
 import {
+    createChildTreeContext,
     joinSidebarBaseRelativePath,
-    resolveChildViewTransition,
-} from "./viewControl";
+} from "./useChildrenCollapsed";
 import {
     isSidebarItemExcludedFileName,
     resolveSidebarConfigFilePath,
@@ -308,10 +308,9 @@ export class StructuralGeneratorService {
                 const dirRelativeKey = baseRelativePathKey
                     ? `${baseRelativePathKey}${entry.name}/`
                     : `${entry.name}/`;
-                const childViewTransition = resolveChildViewTransition(
+                const childTreeContext = createChildTreeContext(
                     parentConfig,
                     dirEffectiveConfig,
-                    dirRelativeKey,
                     currentDepth
                 );
 
@@ -354,9 +353,9 @@ export class StructuralGeneratorService {
                 if (hasMarkdownFiles && !hasSubdirectories) {
                     const fileItems: SidebarItem[] = [];
 
-                    if (childViewTransition.canRecurse) {
+                    if (childTreeContext.canRecurse) {
                         const dirConfigForFiles = {
-                            ...childViewTransition.nextConfig,
+                            ...childTreeContext.nextConfig,
                             _baseRelativePathForChildren: dirRelativeKey
                         };
 
@@ -372,7 +371,7 @@ export class StructuralGeneratorService {
                                     false, // isDir
                                     dirConfigForFiles,
                                     lang,
-                                    childViewTransition.nextDepth,
+                                    childTreeContext.nextDepth,
                                     isDevMode,
                                     this.configReader,
                                     this.fs,
@@ -410,9 +409,9 @@ export class StructuralGeneratorService {
                     continue;
                 }
 
-                if (childViewTransition.canRecurse) {
+                if (childTreeContext.canRecurse) {
                     const dirConfigForFlattening = {
-                        ...childViewTransition.nextConfig,
+                        ...childTreeContext.nextConfig,
                         _baseRelativePathForChildren: dirRelativeKey
                     };
 
@@ -422,7 +421,7 @@ export class StructuralGeneratorService {
                         itemAbsPath,
                         dirConfigForFlattening,
                         lang,
-                        childViewTransition.nextDepth,
+                        childTreeContext.nextDepth,
                         isDevMode
                     );
 

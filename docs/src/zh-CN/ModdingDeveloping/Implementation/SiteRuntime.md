@@ -2,6 +2,7 @@
 title: 现场运行态
 description: 现场运行态的 Forge 实现契约，包含存档持久化数据、chunk 辅助数据、同步与保存检查点。
 priority: 30
+hidden: false
 ---
 
 # 现场运行态实现 {#site-runtime-implementation}

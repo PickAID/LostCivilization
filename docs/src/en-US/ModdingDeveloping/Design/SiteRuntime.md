@@ -1,7 +1,10 @@
 ---
-title: SiteRuntime
-description: Design boundary for the world ledger, live runtime state, chunk cache, and client synchronization.
+title: Site Runtime
+description: >-
+  Design boundary for the world ledger, live runtime state, chunk cache, and
+  client synchronization.
 priority: 30
+hidden: false
 ---
 
 # Site runtime {#site-runtime}

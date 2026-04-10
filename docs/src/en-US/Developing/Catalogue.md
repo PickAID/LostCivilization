@@ -1,7 +1,10 @@
 ---
 title: Catalogue
-description: Top-level index for the current workspace structure, responsibility split, and development entry points.
-priority: 10
+description: >-
+  Top-level index for the current workspace structure, responsibility split, and
+  development entry points.
+priority: 0
+hidden: false
 ---
 
 # Developing {#development}
