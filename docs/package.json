@@ -61,9 +61,8 @@
     },
     "scripts": {
         "dev": "tsx --tsconfig tsconfig.json ./node_modules/vitepress/dist/node/cli.js dev",
-        "build": "tsx .vitepress/scripts/locale-key-sync.mjs && tsx .vitepress/scripts/build-sidebar.mjs && tsx .vitepress/scripts/generate-tag-data.mjs && tsx --tsconfig tsconfig.json ./node_modules/vitepress/dist/node/cli.js build",
+        "build": "tsx .vitepress/scripts/locale-key-sync.mjs && tsx .vitepress/scripts/generate-tag-data.mjs && tsx --tsconfig tsconfig.json ./node_modules/vitepress/dist/node/cli.js build",
         "preview": "tsx --tsconfig tsconfig.json ./node_modules/vitepress/dist/node/cli.js preview",
-        "sidebar": "tsx .vitepress/scripts/build-sidebar.mjs",
         "tags": "tsx .vitepress/scripts/generate-tag-data.mjs",
         "locale": "tsx .vitepress/scripts/locale-key-sync.mjs",
         "title": "tsx .vitepress/scripts/update-index-titles.mjs",

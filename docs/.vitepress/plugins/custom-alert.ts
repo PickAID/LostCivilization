@@ -1,7 +1,30 @@
 import {
     createContainerPlugin,
-    containerConfigMappers as mappers,
 } from "./container-plugin-factory";
+
+function escapeAttr(value: unknown): string {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+}
+
+function toKebabCase(key: string): string {
+    return key.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+}
+
+function mapAlertConfigValue(attrName: string, value: unknown): string {
+    if (typeof value === "string") {
+        return ` ${attrName}="${escapeAttr(value)}"`;
+    }
+
+    if (typeof value === "boolean" || typeof value === "number") {
+        return ` :${attrName}="${value}"`;
+    }
+
+    return ` :${attrName}="${escapeAttr(JSON.stringify(value))}"`;
+}
 
 /**
  * Creates a configurable v-alert component based on Vuetify's API.
@@ -13,18 +36,12 @@ import {
  * :::
  */
 export const customAlert = createContainerPlugin({
-        name: "alert",
+    name: "alert",
     component: "CustomAlert",
     configMapping: {
-        type: mappers.prop("type"),
-        variant: mappers.prop("variant"),
-        density: mappers.prop("density"),
-        border: mappers.prop("border"),
-        color: mappers.prop("color"),
-        lightColor: mappers.prop("lightColor"),
-        darkColor: mappers.prop("darkColor"),
-        icon: mappers.prop("icon"),
-        title: mappers.prop("title"),
-        text: mappers.prop("text"),
-        },
-    });
+        __fullConfig: (config: Record<string, unknown>) =>
+            Object.entries(config)
+                .map(([key, value]) => mapAlertConfigValue(toKebabCase(key), value))
+                .join(""),
+    },
+});

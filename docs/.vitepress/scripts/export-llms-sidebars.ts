@@ -1,7 +1,6 @@
 import {
     _internalConfigureSidebar,
     getSidebar,
-    DEFAULT_SIDEBAR_CACHE_DIR,
 } from "../utils/sidebar/lib";
 import { getLanguageLinks } from "../utils/config/project-api/index.js";
 import { getSrcPath } from "../utils/config/path-resolver.js";
@@ -21,7 +20,6 @@ async function exportLlmsSidebars(): Promise<void> {
         debug: false,
         rootDir: process.cwd(),
         docsDir: getSrcPath(),
-        cacheDir: DEFAULT_SIDEBAR_CACHE_DIR,
     });
 
     const output: Record<string, Record<string, any[]>> = {};

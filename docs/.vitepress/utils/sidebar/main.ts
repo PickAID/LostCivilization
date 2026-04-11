@@ -151,7 +151,7 @@ async function findAllRootIndexMdPaths(
 /**
  * Main orchestration function to generate all sidebars for all configured languages and roots.
  * It reads declarative markdown configurations, generates the sidebar structure,
- * and writes the final `sidebars.json` file in `SidebarMulti` format.
+ * and returns the final `SidebarMulti` object in VitePress format.
  *
  * @param {GenerateSidebarsOptions} options Configuration options for the generation process.
  * @param {string} options.docsPath Absolute path to the root of the `/docs` directory.
@@ -171,13 +171,6 @@ export async function generateSidebars(
     const configReader = new ConfigReaderService(absDocsPath);
     const gitbookService = new GitBookService(nodeFs);
     const gitbookParserService = new GitBookParserService(nodeFs, absDocsPath);
-
-    const generatedSidebarsDir = normalizePathSeparators(
-        path.join(absDocsPath, "..", ".vitepress", "config", "generated")
-    );
-    const generatedSidebarsPath = normalizePathSeparators(
-        path.join(generatedSidebarsDir, "sidebars.json")
-    );
 
     let outputLangSidebar: SidebarMulti = {};
 
