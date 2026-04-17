@@ -34,6 +34,16 @@ export interface BuildBreadcrumbItemsOptions {
     navTree?: BreadcrumbNavNode[];
     localeCodes?: Iterable<string>;
     resolveLinkPath?: (path: string) => string;
+    resolveItemLink?: (
+        path: string,
+        fallbackLink: string | undefined,
+        isLast: boolean,
+    ) => string | undefined;
+    resolveItemText?: (
+        path: string,
+        fallbackText: string,
+        isLast: boolean,
+    ) => string | undefined;
 }
 
 const EXTERNAL_OR_PASSTHROUGH_PATTERN =
@@ -145,7 +155,9 @@ function collectNavLinks(
             linkMap.set(localizedPath, text);
         }
         if (resolveLinkPath) {
-            const resolvedPath = normalizeRoutePath(resolveLinkPath(localizedPath));
+            const resolvedPath = normalizeRoutePath(
+                resolveLinkPath(localizedPath),
+            );
             if (!linkMap.has(resolvedPath)) {
                 linkMap.set(resolvedPath, text);
             }
@@ -156,7 +168,7 @@ function collectNavLinks(
         register(node.text, node.link || node.href);
 
         if (Array.isArray(node.items)) {
-            collectNavLinks(node.items, homeLink, linkMap);
+            collectNavLinks(node.items, homeLink, linkMap, resolveLinkPath);
         }
 
         if (!Array.isArray(node.dropdown?.panels)) continue;
@@ -167,7 +179,7 @@ function collectNavLinks(
                 panel.featured?.link || panel.featured?.href,
             );
             for (const group of panel.groups ?? []) {
-                collectNavLinks(group.items, homeLink, linkMap);
+                collectNavLinks(group.items, homeLink, linkMap, resolveLinkPath);
             }
         }
     }
@@ -194,6 +206,8 @@ export function buildBreadcrumbItems({
     navTree,
     localeCodes,
     resolveLinkPath,
+    resolveItemLink,
+    resolveItemText,
 }: BuildBreadcrumbItemsOptions): BreadcrumbItem[] {
     const normalizedHomeLink = normalizeRoutePath(homeLink);
     const knownRoutes = normalizeRouteSet(
@@ -233,19 +247,24 @@ export function buildBreadcrumbItems({
             : currentPath;
 
         const isLast = index === contentParts.length - 1;
-        const resolvedText =
+        const fallbackText =
             linkMap.get(resolvedCurrentPath) ||
             linkMap.get(currentPath) ||
             (isLast && pageTitle ? pageTitle : humanizeSegment(part));
+        const fallbackLink =
+            isLast ||
+            knownRoutes.has(resolvedCurrentPath) ||
+            knownRoutes.has(currentPath)
+                ? resolvedCurrentPath
+                : undefined;
+        const resolvedText =
+            resolveItemText?.(currentPath, fallbackText, isLast) || fallbackText;
+        const resolvedLink =
+            resolveItemLink?.(currentPath, fallbackLink, isLast) ?? fallbackLink;
 
         items.push({
             text: resolvedText,
-            link:
-                isLast ||
-                knownRoutes.has(resolvedCurrentPath) ||
-                knownRoutes.has(currentPath)
-                    ? resolvedCurrentPath
-                    : undefined,
+            link: resolvedLink,
         });
     });
 

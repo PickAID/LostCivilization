@@ -1,4 +1,5 @@
 import type { MetadataFrontmatterInput } from "./MetadataFrontmatterApi";
+import { shallowRef } from "vue";
 import {
     extractRouteLocale,
     pagePathToDirectoryRoute,
@@ -27,7 +28,40 @@ function readDirectoryMetadataCache(): DirectoryMetadataCache {
     return {};
 }
 
-const directoryMetadataCache = readDirectoryMetadataCache();
+const directoryMetadataCache = shallowRef(readDirectoryMetadataCache());
+
+export async function refreshDirectoryMetadataCache() {
+    if (!import.meta.env.DEV || typeof window === "undefined") {
+        return;
+    }
+
+    const response = await fetch(
+        `/__m1hono_template__/directory-metadata?t=${Date.now()}`,
+    );
+    if (!response.ok) {
+        throw new Error(
+            `Failed to refresh directory metadata cache: ${response.status}`,
+        );
+    }
+
+    directoryMetadataCache.value = (await response.json()) as DirectoryMetadataCache;
+}
+
+if (import.meta.hot) {
+    import.meta.hot.on(
+        "m1honoTemplate:derived-docs-updated",
+        async () => {
+            try {
+                await refreshDirectoryMetadataCache();
+            } catch (error) {
+                console.warn(
+                    "[m1honoTemplate] Failed to refresh directory metadata cache.",
+                    error,
+                );
+            }
+        },
+    );
+}
 
 export function resolveEffectiveMetadataFrontmatter(
     pagePath: string,
@@ -42,7 +76,7 @@ export function resolveEffectiveMetadataFrontmatter(
         return undefined;
     }
 
-    const localeCache = directoryMetadataCache[locale];
+    const localeCache = directoryMetadataCache.value[locale];
     if (!localeCache) {
         return undefined;
     }

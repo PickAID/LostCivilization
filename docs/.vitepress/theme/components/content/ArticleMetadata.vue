@@ -128,32 +128,8 @@
     const { page, frontmatter, lang } = useData();
     const route = useRoute();
 
-    const gitTimestamp = ref<number>(0);
-    const timestampCache = new Map<string, number>();
     const wordCount = ref(0);
     const imageCount = ref(0);
-
-    async function getGitTimestamp(filePath: string): Promise<number> {
-        if (typeof window === "undefined") return 0;
-
-        const cached = timestampCache.get(filePath);
-        if (cached) return cached;
-
-        try {
-            const response = await fetch(
-                `/__git_timestamp__?file=${encodeURIComponent(filePath)}`,
-            );
-            if (response.ok) {
-                const timestamp = await response.json();
-                timestampCache.set(filePath, timestamp);
-                return timestamp;
-            }
-        } catch (error) {
-            console.warn("Failed to get git timestamp:", error);
-        }
-
-        return Date.now();
-    }
 
     function translate(key: string, fallback: string): string {
         const value = (t as Record<string, string | undefined>)[key];
@@ -186,12 +162,10 @@
     const update = computed(() => {
         let timestamp = 0;
 
-        if (frontmatter.value.lastUpdated instanceof Date) {
-            timestamp = +frontmatter.value.lastUpdated;
+        if (typeof page.value.lastUpdated === "number") {
+            timestamp = page.value.lastUpdated;
         } else if (frontmatter.value.date) {
             timestamp = +new Date(frontmatter.value.date);
-        } else if (gitTimestamp.value) {
-            timestamp = gitTimestamp.value;
         } else {
             timestamp = Date.now();
         }
@@ -330,17 +304,8 @@
     }
 
     async function refreshDerivedMetadata() {
-        gitTimestamp.value = 0;
         await nextTick();
         analyze();
-
-        if (
-            page.value.filePath &&
-            !frontmatter.value.lastUpdated &&
-            !frontmatter.value.date
-        ) {
-            gitTimestamp.value = await getGitTimestamp(page.value.filePath);
-        }
     }
 
     onMounted(() => {
@@ -348,7 +313,7 @@
     });
 
     watch(
-        () => page.value.filePath,
+        () => [page.value.filePath, page.value.lastUpdated],
         () => {
             refreshDerivedMetadata();
         },

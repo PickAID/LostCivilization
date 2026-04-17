@@ -12,12 +12,13 @@ import {
 import { templateCompilerOptions } from "@tresjs/core";
 import llmstxt from "vitepress-plugin-llms";
 
-import { sidebarPlugin } from "../utils/sidebar/";
+import { sidebarPlugin } from "../utils/sidebar/plugin";
 import { markdown } from "./markdown-plugins";
 import {
     groupIconVitePlugin,
     localIconLoader,
 } from "vitepress-plugin-group-icons";
+import { m1honoTemplateDerivedDocsSyncPlugin } from "../utils/vitepress/dev/m1honoTemplateDerivedDocsSyncPlugin";
 
 const projectInfo = getProjectInfo();
 const projectPaths = getPaths();

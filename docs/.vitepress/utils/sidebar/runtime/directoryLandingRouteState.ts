@@ -1,6 +1,10 @@
 import { inBrowser } from "vitepress";
+import type { Ref } from "vue";
 import { watch } from "vue";
-import { resolveDirectoryLandingCanonicalPath } from "../shared/directoryLandingRouteResolver";
+import {
+    resolveDirectoryLandingCanonicalPath,
+    setDirectoryLandingSidebar,
+} from "../shared/directoryLandingRouteResolver";
 
 type RouteLike = {
     path: string;
@@ -13,13 +17,17 @@ type RouterLike = {
 export function useDirectoryLandingRouteSync(
     route: RouteLike,
     router: RouterLike,
+    sidebarSource?: Ref<unknown>,
 ) {
     let syncingDirectoryLandingRoute = false;
 
     watch(
-        () => route.path,
-        async (path) => {
+        () => [route.path, sidebarSource?.value] as const,
+        async ([path, sidebar]) => {
             if (!inBrowser || syncingDirectoryLandingRoute) return;
+            if (sidebarSource) {
+                setDirectoryLandingSidebar(sidebar);
+            }
 
             const canonicalPath = resolveDirectoryLandingCanonicalPath(path);
             if (!canonicalPath) return;

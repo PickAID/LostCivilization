@@ -1,4 +1,8 @@
 import { DIRECTORY_LANDING_FILE_CANDIDATES } from "./sidebarFileConventions";
+import {
+    resolveDirectoryLandingPathFromCache,
+    stripDirectoryLandingPathFromCache,
+} from "@utils/vitepress/api/frontmatter/metadata/DirectoryRouteCacheState";
 
 type SidebarItemLike = {
     link?: string;
@@ -116,7 +120,7 @@ function findRootLandingPath(
             if (!isLandingFileKey(item._relativePathKey)) continue;
             const landingPath = normalizeInternalLink(item.link);
             if (!landingPath) continue;
-            if (pathToDirectory(landingPath) === basePath) {
+            if (basePath === "/" || pathToDirectory(landingPath) === basePath) {
                 return landingPath;
             }
         }
@@ -169,7 +173,15 @@ function buildDirectoryLandingRoutes(sidebar: SidebarSource) {
         const normalizedBasePath = normalizeRoutePath(basePath, "ensure");
         const rootLandingPath = findRootLandingPath(items, normalizedBasePath);
         if (rootLandingPath) {
-            setDirectoryLandingRoute(routes, normalizedBasePath, rootLandingPath);
+            const inferredRootBasePath =
+                normalizedBasePath === "/"
+                    ? pathToDirectory(rootLandingPath)
+                    : normalizedBasePath;
+            setDirectoryLandingRoute(
+                routes,
+                inferredRootBasePath,
+                rootLandingPath,
+            );
         }
 
         walkSidebarItems(items, (item) => {
@@ -200,11 +212,16 @@ function resolveLandingPath(path: string) {
 
 export function resolveDirectoryLandingCanonicalPath(path: string): string | null {
     const normalized = normalizeRoutePath(path);
-    if (normalized === "/" || landingPathSet.has(normalized)) {
+    const cachedLandingPath = resolveDirectoryLandingPathFromCache(normalized);
+    if (
+        normalized === "/" ||
+        landingPathSet.has(normalized) ||
+        cachedLandingPath === normalized
+    ) {
         return null;
     }
 
-    return resolveLandingPath(normalized);
+    return cachedLandingPath ?? resolveLandingPath(normalized);
 }
 
 export function resolveDirectoryLandingAwarePath(path: string): string {
@@ -214,6 +231,10 @@ export function resolveDirectoryLandingAwarePath(path: string): string {
 
 export function stripDirectoryLandingPath(path: string): string {
     const normalized = normalizeRoutePath(path, "strip");
+    const cachedDirectoryPath = stripDirectoryLandingPathFromCache(normalized);
+    if (cachedDirectoryPath) {
+        return normalizeRoutePath(cachedDirectoryPath, "strip");
+    }
 
     for (const [directoryPath, landingPath] of directoryLandingRoutes.entries()) {
         if (landingPath === normalized) {

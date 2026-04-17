@@ -1,6 +1,8 @@
 const EXTERNAL_OR_PASSTHROUGH_PATTERN =
     /^(?:https?:)?\/\/|^(?:mailto|tel|data|blob):/i;
 
+const CONTENT_ROOT_PREFIXES = ["docs", "src"] as const;
+
 export function normalizeKnownRoutePath(path: string) {
     let route = (path || "/").trim();
     if (!route) return "/";
@@ -17,20 +19,33 @@ export function normalizeKnownRoutePath(path: string) {
     return route;
 }
 
+function stripContentRoot(route: string) {
+    for (const root of CONTENT_ROOT_PREFIXES) {
+        const embeddedIndex = route.lastIndexOf(`/${root}/`);
+        if (embeddedIndex >= 0) {
+            return route.slice(embeddedIndex + `/${root}`.length);
+        }
+
+        if (route.startsWith(`${root}/`)) {
+            return route.slice(root.length);
+        }
+
+        if (route.startsWith(`/${root}`)) {
+            return route.slice(`/${root}`.length);
+        }
+    }
+
+    return route;
+}
+
 export function normalizeMarkdownPageRoute(filePath: string) {
     let route = (filePath || "/").trim();
     if (!route) return "/";
 
     route = route.replace(/\\/g, "/");
     route = route.split(/[?#]/)[0] || "/";
-    const embeddedSrcIndex = route.lastIndexOf("/src/");
-    if (embeddedSrcIndex >= 0) {
-        route = route.slice(embeddedSrcIndex + "/src".length);
-    } else if (route.startsWith("src/")) {
-        route = route.slice("src".length);
-    } else {
-        route = route.replace(/^\/src/, "");
-    }
+    route = stripContentRoot(route);
+
     return normalizeKnownRoutePath(route);
 }
 
@@ -70,6 +85,11 @@ export function buildKnownPagePathSetFromSidebar(sidebarConfig: unknown) {
         if (!trimmed || EXTERNAL_OR_PASSTHROUGH_PATTERN.test(trimmed)) return;
         set.add(normalizeKnownRoutePath(trimmed));
     };
+
+    if (Array.isArray(sidebarConfig)) {
+        collectSidebarLinks(sidebarConfig, addPath);
+        return set;
+    }
 
     for (const [basePath, entries] of Object.entries(
         sidebarConfig as Record<string, unknown>,

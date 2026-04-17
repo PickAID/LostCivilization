@@ -7,7 +7,7 @@ import {
     getSearchLocaleKey,
     isFeatureEnabled,
 } from "../../utils/config/project-config";
-import { getSidebarSync } from "../../utils/sidebar";
+import { getSidebarSync } from "../../utils/sidebar/lib";
 
 const projectInfo = getProjectInfo();
 const langConfig = getLanguageByCode("en-US")!;

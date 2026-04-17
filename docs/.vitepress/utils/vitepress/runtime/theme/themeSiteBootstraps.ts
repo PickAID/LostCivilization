@@ -1,6 +1,6 @@
 import mermaid from "mermaid";
 import mdVar from "vitepress-md-var";
-import { onMounted, onUnmounted, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, watch } from "vue";
 import { setupMultipleChoice } from "markdown-it-multiple-choice";
 import { setupLanguageControl } from "@utils/i18n/languageControl";
 import { initMermaidConfig } from "@utils/charts/mermaid";
@@ -52,11 +52,36 @@ function createMdVarConfig(projectInfo: ProjectInfoLike) {
     return mdVarConfig;
 }
 
+async function waitForClientDom() {
+    if (import.meta.env.SSR) return;
+
+    await nextTick();
+    await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+    });
+}
+
+async function refreshSiteStats(
+    initSiteStats?: () => Promise<boolean> | void,
+) {
+    if (import.meta.env.SSR) return;
+
+    await waitForClientDom();
+    const initialized = await initSiteStats?.();
+    await waitForClientDom();
+
+    if (initialized === false && !window.busuanzi?.fetch) {
+        return;
+    }
+
+    window.busuanzi?.fetch?.();
+}
+
 export function installThemeSiteBootstraps(options: {
     route: RouteLike;
     projectInfo: ProjectInfoLike;
     mermaidEnabled: boolean;
-    initSiteStats?: () => void;
+    initSiteStats?: () => Promise<boolean> | void;
 }) {
     const { route, projectInfo, mermaidEnabled, initSiteStats } = options;
 
@@ -72,7 +97,7 @@ export function installThemeSiteBootstraps(options: {
         mdVar(route, createMdVarConfig(projectInfo));
 
         if (shouldUseBusuanzi(projectInfo)) {
-            initSiteStats?.();
+            void refreshSiteStats(initSiteStats);
         }
 
         bindFancybox();
@@ -86,8 +111,8 @@ export function installThemeSiteBootstraps(options: {
             setupLanguageControl();
             bindFancybox();
 
-            if (shouldUseBusuanzi(projectInfo) && window.busuanzi) {
-                window.busuanzi.fetch();
+            if (shouldUseBusuanzi(projectInfo)) {
+                void refreshSiteStats(initSiteStats);
             }
         },
     );

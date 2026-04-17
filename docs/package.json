@@ -65,8 +65,7 @@
         "preview": "tsx --tsconfig tsconfig.json ./node_modules/vitepress/dist/node/cli.js preview",
         "tags": "tsx .vitepress/scripts/generate-tag-data.mjs",
         "locale": "tsx .vitepress/scripts/locale-key-sync.mjs",
-        "title": "tsx .vitepress/scripts/update-index-titles.mjs",
-        "frontmatter": "tsx .vitepress/scripts/update-frontmatter.mjs"
+        "title": "tsx .vitepress/scripts/update-index-titles.mjs"
     },
     "dependencies": {
         "@dhlx/vitepress-plugin-drawio": "^0.0.10",

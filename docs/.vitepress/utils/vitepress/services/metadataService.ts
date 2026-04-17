@@ -31,26 +31,72 @@ class ContentMetadataService {
 }
 
 class BusuanziService {
-    init() {
+    private pendingInit: Promise<boolean> | null = null;
+
+    private waitForClientApi(maxAttempts = 30, intervalMs = 200) {
         return new Promise<boolean>((resolve) => {
             if (typeof window === "undefined") {
                 resolve(false);
                 return;
             }
 
-            const existing = window.document.querySelector('script[src*="busuanzi"]');
-            if (existing) {
-                resolve(true);
-                return;
-            }
+            let attempts = 0;
+            const poll = () => {
+                if (window.busuanzi?.fetch) {
+                    resolve(true);
+                    return;
+                }
 
-            const script = document.createElement("script");
-            script.src = "//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js";
-            script.async = true;
-            script.onload = () => resolve(true);
+                attempts += 1;
+                if (attempts >= maxAttempts) {
+                    resolve(false);
+                    return;
+                }
+
+                window.setTimeout(poll, intervalMs);
+            };
+
+            poll();
+        });
+    }
+
+    init() {
+        if (typeof window === "undefined") {
+            return Promise.resolve(false);
+        }
+
+        if (window.busuanzi?.fetch) {
+            return Promise.resolve(true);
+        }
+
+        if (this.pendingInit) {
+            return this.pendingInit;
+        }
+
+        const existing = window.document.querySelector<HTMLScriptElement>(
+            'script[src*="busuanzi"]',
+        );
+        if (existing) {
+            this.pendingInit = this.waitForClientApi().finally(() => {
+                this.pendingInit = null;
+            });
+            return this.pendingInit;
+        }
+
+        const script = document.createElement("script");
+        script.src = "//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js";
+        script.async = true;
+        this.pendingInit = new Promise<boolean>((resolve) => {
+            script.onload = () => {
+                void this.waitForClientApi().then(resolve);
+            };
             script.onerror = () => resolve(false);
             document.body.appendChild(script);
+        }).finally(() => {
+            this.pendingInit = null;
         });
+
+        return this.pendingInit;
     }
 }
 
@@ -82,4 +128,3 @@ export const metadataTranslations: { icons: Record<string, string> } = {
 
 export const getMetadataIcon = (key: string): string => metadataTranslations.icons[key] || "";
 export const initBusuanzi = (): Promise<boolean> => busuanziService.init();
-

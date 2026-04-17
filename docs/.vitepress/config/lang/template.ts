@@ -7,7 +7,7 @@ import {
     getSearchLocaleKey,
     isFeatureEnabled,
 } from "../../utils/config/project-config";
-import { getSidebarSync } from "../../utils/sidebar";
+import { getSidebarSync } from "../../utils/sidebar/lib";
 
 const projectInfo = getProjectInfo();
 // Note: The 'code' field should follow the format "language-region" (e.g., "en-US", "zh-CN") for proper locale handling
