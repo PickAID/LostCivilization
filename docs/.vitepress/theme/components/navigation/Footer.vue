@@ -1,7 +1,8 @@
 <script setup lang="ts">
     // @ts-nocheck
-    import { withBase, useData } from "vitepress";
+    import { withBase, useData, useRoute } from "vitepress";
     import { computed, onMounted, ref, watch } from "vue";
+    import utils from "@utils";
     import {
         getProjectInfo,
         getLanguages,
@@ -22,6 +23,7 @@
     } from "@utils/vitepress/runtime/theme";
 
     const { frontmatter, lang, isDark } = useData();
+    const route = useRoute();
     const { effectiveDark } = getThemeRuntime(isDark);
     const projectInfo = getProjectInfo();
 
@@ -35,6 +37,11 @@
 
     const footerData = ref<FooterConfig | null>(null);
     const currentYear = ref("");
+    const sitePageViewsLoading = ref(true);
+    const sitePageViews = ref<string | number>("-");
+    const siteVisitorsLoading = ref(true);
+    const siteVisitors = ref<string | number>("-");
+    let siteStatsRequestToken = 0;
 
     /**
      * Whether the current page is the home page.
@@ -89,7 +96,44 @@
 
     onMounted(() => {
         currentYear.value = new Date().getFullYear().toString();
+        void refreshSiteStats();
     });
+
+    watch(
+        () => route.path,
+        () => {
+            void refreshSiteStats();
+        },
+        { flush: "post" },
+    );
+
+    async function refreshSiteStats() {
+        if (typeof window === "undefined") return;
+
+        if (!projectInfo.footerOptions.showSiteStats) {
+            sitePageViewsLoading.value = false;
+            siteVisitorsLoading.value = false;
+            sitePageViews.value = "-";
+            siteVisitors.value = "-";
+            return;
+        }
+
+        const requestToken = ++siteStatsRequestToken;
+        sitePageViewsLoading.value = true;
+        siteVisitorsLoading.value = true;
+        sitePageViews.value = "-";
+        siteVisitors.value = "-";
+
+        const stats = await utils.vitepress.fetchBusuanziStats();
+        if (requestToken !== siteStatsRequestToken) {
+            return;
+        }
+
+        sitePageViews.value = stats?.site_pv ?? "-";
+        siteVisitors.value = stats?.site_uv ?? "-";
+        sitePageViewsLoading.value = false;
+        siteVisitorsLoading.value = false;
+    }
 
     /**
      * Filtered footer groups based on page type.
@@ -515,10 +559,13 @@
                     class="info-item"
                 >
                     <Icon icon="mdi:eye-outline" />
-                    <span id="busuanzi_container_site_pv" class="stats-text">
-                        <span id="busuanzi_value_site_pv"
-                            ><i class="fa fa-spinner fa-spin"></i
-                        ></span>
+                    <span class="stats-text">
+                        <template v-if="sitePageViewsLoading">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </template>
+                        <template v-else>
+                            {{ sitePageViews }}
+                        </template>
                         {{ t.visits }}
                     </span>
                 </div>
@@ -528,10 +575,13 @@
                     class="info-item"
                 >
                     <Icon icon="mdi:account-outline" />
-                    <span id="busuanzi_container_site_uv" class="stats-text">
-                        <span id="busuanzi_value_site_uv"
-                            ><i class="fa fa-spinner fa-spin"></i
-                        ></span>
+                    <span class="stats-text">
+                        <template v-if="siteVisitorsLoading">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </template>
+                        <template v-else>
+                            {{ siteVisitors }}
+                        </template>
                         {{ t.siteVisitors }}
                     </span>
                 </div>

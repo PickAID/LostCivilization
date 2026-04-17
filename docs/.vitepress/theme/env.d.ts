@@ -42,8 +42,16 @@ declare module "@localSearchIndex" {
 
 declare global {
     interface Window {
-        busuanzi?: {
-            fetch: () => void;
+        bszCaller?: {
+            fetch: (
+                url: string,
+                callback: (payload: Record<string, string | number>) => void,
+            ) => void;
+        };
+        bszTag?: {
+            texts: (payload: Record<string, string | number>) => void;
+            shows: () => void;
+            hides: () => void;
         };
     }
 }

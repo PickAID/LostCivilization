@@ -46,7 +46,7 @@ type VuetifyThemeController = typeof vuetify.theme & {
 };
 
 function syncVuetifyTheme(isDark: boolean) {
-	const themeName = isDark ? "dark" : "light";
+	const themeName = isDark ? "vitepressDark" : "vitepressLight";
 	const themeController = vuetify.theme as VuetifyThemeController;
 
 	if (typeof themeController.change === "function") {
@@ -178,7 +178,6 @@ export default {
 			route,
 			projectInfo,
 			mermaidEnabled: isFeatureEnabled("mermaid"),
-			initSiteStats: () => utils.vitepress.initBusuanzi(),
 		});
 	},
 } satisfies Theme;

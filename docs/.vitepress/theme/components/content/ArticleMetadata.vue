@@ -130,6 +130,9 @@
 
     const wordCount = ref(0);
     const imageCount = ref(0);
+    const pageViewsLoading = ref(true);
+    const pageViewsCount = ref<string | number>("-");
+    let pageViewsRequestToken = 0;
 
     function translate(key: string, fallback: string): string {
         const value = (t as Record<string, string | undefined>)[key];
@@ -308,15 +311,43 @@
         analyze();
     }
 
+    async function refreshPageViews() {
+        if (typeof window === "undefined") return;
+        if (!resolvedMetadata.value.metrics.pageViews) {
+            pageViewsLoading.value = false;
+            pageViewsCount.value = "-";
+            return;
+        }
+
+        const requestToken = ++pageViewsRequestToken;
+        pageViewsCount.value = "-";
+        pageViewsLoading.value = true;
+        await nextTick();
+        const count = await utils.vitepress.fetchBusuanziPageViews();
+        if (requestToken !== pageViewsRequestToken) {
+            return;
+        }
+        pageViewsCount.value = count ?? "-";
+        pageViewsLoading.value = false;
+    }
+
     onMounted(() => {
-        refreshDerivedMetadata();
+        void refreshDerivedMetadata();
+        void refreshPageViews();
     });
 
     watch(
-        () => [page.value.filePath, page.value.lastUpdated],
+        () => [
+            route.path,
+            page.value.filePath,
+            page.value.lastUpdated,
+            resolvedMetadata.value.metrics.pageViews,
+        ],
         () => {
-            refreshDerivedMetadata();
+            void refreshDerivedMetadata();
+            void refreshPageViews();
         },
+        { flush: "post" },
     );
 
     function metricIcon(key: MetadataMetricKey) {
@@ -341,12 +372,19 @@
                         </span>
                         <span
                             v-else
-                            id="busuanzi_container_page_pv"
                         >
-                            {{ translate("pageViews", "Page views: {count}").replace("{count}", "")
-                            }}<span id="busuanzi_value_page_pv"
-                                ><i class="fa fa-spinner fa-spin"></i
-                            ></span>
+                            <template v-if="pageViewsLoading">
+                                {{ translate("pageViews", "Page views: {count}").replace("{count}", "") }}
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </template>
+                            <template v-else>
+                                {{
+                                    translate("pageViews", "Page views: {count}").replace(
+                                        "{count}",
+                                        String(pageViewsCount),
+                                    )
+                                }}
+                            </template>
                         </span>
                     </v-btn>
                 </v-col>

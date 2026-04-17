@@ -32,6 +32,11 @@ class ContentMetadataService {
 
 class BusuanziService {
     private pendingInit: Promise<boolean> | null = null;
+    private pendingFetch: Promise<Record<string, string | number> | null> | null =
+        null;
+    private readonly endpoint =
+        "//busuanzi.ibruce.info/busuanzi?jsonpCallback=BusuanziCallback";
+    private readonly fetchTimeoutMs = 4000;
 
     private waitForClientApi(maxAttempts = 30, intervalMs = 200) {
         return new Promise<boolean>((resolve) => {
@@ -42,7 +47,38 @@ class BusuanziService {
 
             let attempts = 0;
             const poll = () => {
-                if (window.busuanzi?.fetch) {
+                if (window.bszCaller?.fetch && window.bszTag?.texts) {
+                    resolve(true);
+                    return;
+                }
+
+                attempts += 1;
+                if (attempts >= maxAttempts) {
+                    resolve(false);
+                    return;
+                }
+
+                window.setTimeout(poll, intervalMs);
+            };
+
+            poll();
+        });
+    }
+
+    private waitForTargets(
+        selectors: string[],
+        maxAttempts = 40,
+        intervalMs = 100,
+    ) {
+        return new Promise<boolean>((resolve) => {
+            if (typeof window === "undefined" || typeof document === "undefined") {
+                resolve(false);
+                return;
+            }
+
+            let attempts = 0;
+            const poll = () => {
+                if (selectors.some((selector) => document.querySelector(selector))) {
                     resolve(true);
                     return;
                 }
@@ -65,7 +101,7 @@ class BusuanziService {
             return Promise.resolve(false);
         }
 
-        if (window.busuanzi?.fetch) {
+        if (window.bszCaller?.fetch && window.bszTag?.texts) {
             return Promise.resolve(true);
         }
 
@@ -98,6 +134,116 @@ class BusuanziService {
 
         return this.pendingInit;
     }
+
+    private executeFetch(timeoutMs = this.fetchTimeoutMs) {
+        if (this.pendingFetch) {
+            return this.pendingFetch;
+        }
+
+        this.pendingFetch = new Promise<Record<string, string | number> | null>((resolve) => {
+            if (!window.bszCaller?.fetch || !window.bszTag?.texts) {
+                resolve(null);
+                return;
+            }
+
+            let settled = false;
+            const finalize = (payload: Record<string, string | number> | null) => {
+                if (settled) return;
+                settled = true;
+                window.clearTimeout(timeoutId);
+                resolve(payload);
+            };
+
+            const timeoutId = window.setTimeout(() => {
+                console.warn("[busuanzi] Stats request timed out.");
+                finalize(null);
+            }, timeoutMs);
+
+            try {
+                window.bszCaller.fetch(this.endpoint, (payload) => {
+                    finalize(payload);
+                });
+            } catch (error) {
+                console.warn("[busuanzi] Failed to fetch stats payload.", error);
+                finalize(null);
+            }
+        }).finally(() => {
+            this.pendingFetch = null;
+        });
+
+        return this.pendingFetch;
+    }
+
+    private applyPayload(payload: Record<string, string | number>) {
+        try {
+            window.bszTag?.texts(payload);
+            window.bszTag?.shows?.();
+        } catch (error) {
+            console.warn("[busuanzi] Failed to apply refreshed stats.", error);
+            window.bszTag?.hides?.();
+        }
+    }
+
+    async fetchStats(
+        selectors?: string | string[],
+        options?: {
+            maxAttempts?: number;
+            intervalMs?: number;
+            timeoutMs?: number;
+        },
+    ) {
+        if (typeof window === "undefined" || typeof document === "undefined") {
+            return null;
+        }
+
+        const initialized = await this.init();
+        if (initialized === false && !window.bszCaller?.fetch) {
+            return null;
+        }
+
+        if (selectors) {
+            const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+            const targetsReady = await this.waitForTargets(
+                selectorList,
+                options?.maxAttempts,
+                options?.intervalMs,
+            );
+            if (!targetsReady) {
+                return null;
+            }
+        }
+
+        return this.executeFetch(options?.timeoutMs);
+    }
+
+    async refresh(
+        selectors: string | string[],
+        options?: {
+            maxAttempts?: number;
+            intervalMs?: number;
+            timeoutMs?: number;
+        },
+    ) {
+        const payload = await this.fetchStats(
+            selectors,
+            options,
+        );
+        if (!payload) {
+            return false;
+        }
+
+        this.applyPayload(payload);
+        return true;
+    }
+
+    async fetchPageViews(options?: {
+        maxAttempts?: number;
+        intervalMs?: number;
+        timeoutMs?: number;
+    }) {
+        const payload = await this.fetchStats(undefined, options);
+        return payload?.page_pv ?? null;
+    }
 }
 
 const readingTimeService = new ReadingTimeService();
@@ -128,3 +274,30 @@ export const metadataTranslations: { icons: Record<string, string> } = {
 
 export const getMetadataIcon = (key: string): string => metadataTranslations.icons[key] || "";
 export const initBusuanzi = (): Promise<boolean> => busuanziService.init();
+export const refreshBusuanzi = (
+    selectors: string | string[],
+    options?: {
+        maxAttempts?: number;
+        intervalMs?: number;
+        timeoutMs?: number;
+    },
+): Promise<boolean> => busuanziService.refresh(selectors, options);
+export const fetchBusuanziStats = (
+    options?: {
+        maxAttempts?: number;
+        intervalMs?: number;
+        timeoutMs?: number;
+    },
+): Promise<Record<string, string | number> | null> =>
+    busuanziService.fetchStats(undefined, options);
+export const refreshBusuanziPageViews = (options?: {
+    maxAttempts?: number;
+    intervalMs?: number;
+    timeoutMs?: number;
+}): Promise<boolean> =>
+    busuanziService.refresh("#busuanzi_value_page_pv", options);
+export const fetchBusuanziPageViews = (options?: {
+    maxAttempts?: number;
+    intervalMs?: number;
+    timeoutMs?: number;
+}): Promise<string | number | null> => busuanziService.fetchPageViews(options);
