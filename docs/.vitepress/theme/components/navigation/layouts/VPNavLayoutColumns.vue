@@ -6,21 +6,41 @@
     import { resolveAccessibleNavHref } from "@utils/vitepress/api/navigation/NavLinkAccessService";
     import NavHoverPreviewSheet from "./NavHoverPreviewSheet.vue";
     import {
+        activeNavHoverMenuId,
         createNavHoverPreviewState,
         activateNavHoverMenu,
+        cancelNavHoverMenuClose,
         deactivateNavHoverMenu,
+        scheduleNavHoverMenuClose,
     } from "@utils/vitepress/runtime/navigation/navHoverPreviewState";
 
     const props = defineProps<{
         item: NavItem;
     }>();
 
+    function toStableMenuSlug(text: string) {
+        const normalized = text.trim().normalize("NFKD");
+        if (!normalized) return "menu";
+
+        const parts = Array.from(normalized)
+            .map((char) => {
+                if (/^[a-z0-9_-]$/i.test(char)) {
+                    return char.toLowerCase();
+                }
+
+                const codePoint = char.codePointAt(0);
+                return codePoint ? codePoint.toString(36) : "";
+            })
+            .filter(Boolean);
+
+        return parts.join("-").replace(/-{2,}/g, "-");
+    }
+
     const rootRef = ref<HTMLElement | null>(null);
-    const isOpen = ref(false);
-    let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
     const columns = computed(() => props.item.dropdown?.panels || []);
     const alignment = computed(() => props.item.dropdown?.align || "center");
+    const dropdownPreview = computed(() => props.item.dropdown?.preview || null);
     const previewLinks = computed<NavLink[]>(() => {
         const links: NavLink[] = [];
         for (const panel of columns.value) {
@@ -32,15 +52,15 @@
         }
         return links;
     });
-    const hasPreviewColumn = computed(() => previewLinks.value.length > 0);
+    const hasPreviewColumn = computed(
+        () => previewLinks.value.length > 0 || Boolean(dropdownPreview.value),
+    );
 
     const menuId = computed(() => {
-        const slug = props.item.text
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-_]/g, "");
+        const slug = toStableMenuSlug(props.item.text);
         return `nav-columns-${slug || "menu"}`;
     });
+    const isOpen = computed(() => activeNavHoverMenuId.value === menuId.value);
 
     const resolveHref = (link: NavLink) =>
         resolveAccessibleNavHref(link.link, link.href);
@@ -57,18 +77,9 @@
         resetPreview,
     } = createNavHoverPreviewState(menuId.value);
 
-    function clearCloseTimer() {
-        if (closeTimer === null) return;
-        clearTimeout(closeTimer);
-        closeTimer = null;
-    }
-
     function openMenu() {
-        clearCloseTimer();
-        // Tell the global singleton this menu is now active — instantly
-        // clears any preview from a previously active sibling menu.
+        cancelNavHoverMenuClose();
         activateNavHoverMenu(menuId.value);
-        isOpen.value = true;
     }
 
     const onRootEnter = () => {
@@ -76,19 +87,20 @@
     };
 
     const onRootLeave = () => {
-        closeMenu();
+        scheduleNavHoverMenuClose(menuId.value);
     };
 
     const closeMenu = () => {
-        clearCloseTimer();
-        isOpen.value = false;
         resetPreview();
         deactivateNavHoverMenu(menuId.value);
     };
 
     onClickOutside(rootRef, closeMenu);
     onBeforeUnmount(() => {
-        clearCloseTimer();
+        cancelNavHoverMenuClose(menuId.value);
+        if (activeNavHoverMenuId.value === menuId.value) {
+            deactivateNavHoverMenu(menuId.value);
+        }
     });
 </script>
 
@@ -223,18 +235,12 @@
                     @mouseenter="onSheetEnter"
                     @mouseleave="onSheetLeave"
                 >
-                    <Transition name="item-preview-sheet" mode="out-in">
-                        <NavHoverPreviewSheet
-                            v-if="activePreviewLink"
-                            :key="activePreviewLink.text"
-                            :link="activePreviewLink"
-                        />
-                        <div
-                            v-else
-                            key="placeholder"
-                            class="preview-placeholder"
-                        />
-                    </Transition>
+                    <NavHoverPreviewSheet
+                        v-if="activePreviewLink || dropdownPreview"
+                        :link="activePreviewLink"
+                        :preview="dropdownPreview"
+                    />
+                    <div v-else class="preview-placeholder" />
                 </aside>
             </div>
         </div>
@@ -245,6 +251,20 @@
     .VPNavLayoutColumns {
         position: relative;
         display: inline-flex;
+    }
+
+    .VPNavLayoutColumns::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: -48px;
+        right: -48px;
+        height: 18px;
+        pointer-events: none;
+    }
+
+    .VPNavLayoutColumns.is-open::after {
+        pointer-events: auto;
     }
 
     .menu-trigger {
@@ -309,9 +329,9 @@
         transform: translateX(var(--transform-x)) translateY(8px) scale(0.97);
         transform-origin: top center;
         transition:
-            opacity 0.4s cubic-bezier(0.2, 0.9, 0.2, 1),
-            transform 0.5s cubic-bezier(0.32, 0.72, 0, 1),
-            visibility 0.5s;
+            opacity 0.16s cubic-bezier(0.2, 0.9, 0.2, 1),
+            transform 0.18s cubic-bezier(0.32, 0.72, 0, 1),
+            visibility 0.16s;
         white-space: normal;
         overflow-wrap: anywhere;
         overflow: hidden;
@@ -434,6 +454,16 @@
         min-width: 0;
     }
 
+    .preview-sheet::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -40px;
+        width: 40px;
+        pointer-events: auto;
+    }
+
     .preview-placeholder {
         width: 100%;
         min-height: 200px;
@@ -441,19 +471,6 @@
         border: 0;
         background: transparent;
         opacity: 0;
-    }
-
-    .item-preview-sheet-enter-active,
-    .item-preview-sheet-leave-active {
-        transition:
-            opacity 0.25s ease,
-            transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .item-preview-sheet-enter-from,
-    .item-preview-sheet-leave-to {
-        opacity: 0;
-        transform: translateY(4px) scale(0.98);
     }
 
     .link-icon {

@@ -1,13 +1,23 @@
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, getCurrentInstance, onBeforeUnmount, ref } from "vue";
 import { NavLink } from "@utils/config/navTypes";
 
-const globalActiveMenuId = ref<string | null>(null);
+const NAV_HOVER_MENU_CLOSE_DELAY_MS = 90;
+const NAV_HOVER_PREVIEW_HIDE_DELAY_MS = 240;
+
+export const activeNavHoverMenuId = ref<string | null>(null);
 const globalHoveredLink = ref<NavLink | null>(null);
 const globalSheetHovered = ref(false);
 let globalHideTimer: ReturnType<typeof setTimeout> | null = null;
+let globalMenuCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
 function hasPreview(link: NavLink | null): boolean {
     return Boolean(link?.preview);
+}
+
+function clearGlobalMenuCloseTimer() {
+    if (globalMenuCloseTimer === null) return;
+    clearTimeout(globalMenuCloseTimer);
+    globalMenuCloseTimer = null;
 }
 
 function clearGlobalHideTimer() {
@@ -16,69 +26,121 @@ function clearGlobalHideTimer() {
     globalHideTimer = null;
 }
 
-function hideGlobalPreview() {
+function resetGlobalPreview() {
     clearGlobalHideTimer();
-    if (!globalSheetHovered.value) {
+    globalSheetHovered.value = false;
+    globalHoveredLink.value = null;
+}
+
+function scheduleGlobalPreviewHide(menuId: string) {
+    clearGlobalHideTimer();
+    globalHideTimer = setTimeout(() => {
+        globalHideTimer = null;
+        if (activeNavHoverMenuId.value !== menuId || globalSheetHovered.value) {
+            return;
+        }
         globalHoveredLink.value = null;
-    }
+    }, NAV_HOVER_PREVIEW_HIDE_DELAY_MS);
 }
 
 export function activateNavHoverMenu(menuId: string): void {
-    if (globalActiveMenuId.value === menuId) return;
+    clearGlobalMenuCloseTimer();
+
+    if (activeNavHoverMenuId.value === menuId) return;
     clearGlobalHideTimer();
     globalHoveredLink.value = null;
     globalSheetHovered.value = false;
-    globalActiveMenuId.value = menuId;
+    activeNavHoverMenuId.value = menuId;
 }
 
 export function deactivateNavHoverMenu(menuId: string): void {
-    if (globalActiveMenuId.value !== menuId) return;
+    if (activeNavHoverMenuId.value !== menuId) return;
+    clearGlobalMenuCloseTimer();
+    resetGlobalPreview();
+    activeNavHoverMenuId.value = null;
+}
+
+export function scheduleNavHoverMenuClose(
+    menuId: string,
+    delayMs = NAV_HOVER_MENU_CLOSE_DELAY_MS,
+): void {
+    if (activeNavHoverMenuId.value !== menuId) return;
+
+    clearGlobalMenuCloseTimer();
+    globalMenuCloseTimer = setTimeout(() => {
+        globalMenuCloseTimer = null;
+        if (activeNavHoverMenuId.value !== menuId) return;
+        resetGlobalPreview();
+        activeNavHoverMenuId.value = null;
+    }, delayMs);
+}
+
+export function cancelNavHoverMenuClose(menuId?: string): void {
+    if (menuId && activeNavHoverMenuId.value !== menuId) return;
+    clearGlobalMenuCloseTimer();
+}
+
+export function resetNavHoverStateForTests(): void {
+    clearGlobalMenuCloseTimer();
     clearGlobalHideTimer();
+    activeNavHoverMenuId.value = null;
     globalHoveredLink.value = null;
     globalSheetHovered.value = false;
-    globalActiveMenuId.value = null;
+}
+
+export function getActiveNavHoverPreviewLinkForTests(): NavLink | null {
+    return globalHoveredLink.value;
+}
+
+export function isNavHoverPreviewSheetHoveredForTests(): boolean {
+    return globalSheetHovered.value;
 }
 
 export function createNavHoverPreviewState(menuId: string) {
     const activePreviewLink = computed<NavLink | null>(() =>
-        globalActiveMenuId.value === menuId && hasPreview(globalHoveredLink.value) ? globalHoveredLink.value : null,
+        activeNavHoverMenuId.value === menuId && hasPreview(globalHoveredLink.value)
+            ? globalHoveredLink.value
+            : null,
     );
 
     function onItemEnter(link: NavLink) {
-        if (globalActiveMenuId.value !== menuId) return;
+        if (activeNavHoverMenuId.value !== menuId) return;
+        cancelNavHoverMenuClose(menuId);
         clearGlobalHideTimer();
+        globalSheetHovered.value = false;
         globalHoveredLink.value = hasPreview(link) ? link : null;
     }
 
     function onItemLeave() {
-        if (globalActiveMenuId.value !== menuId) return;
-        hideGlobalPreview();
+        if (activeNavHoverMenuId.value !== menuId) return;
+        scheduleGlobalPreviewHide(menuId);
     }
 
     function onSheetEnter() {
-        if (globalActiveMenuId.value !== menuId) return;
+        if (activeNavHoverMenuId.value !== menuId) return;
+        cancelNavHoverMenuClose(menuId);
         clearGlobalHideTimer();
         globalSheetHovered.value = true;
     }
 
     function onSheetLeave() {
-        if (globalActiveMenuId.value !== menuId) return;
+        if (activeNavHoverMenuId.value !== menuId) return;
         globalSheetHovered.value = false;
-        hideGlobalPreview();
+        scheduleGlobalPreviewHide(menuId);
     }
 
     function resetPreview() {
-        if (globalActiveMenuId.value !== menuId) return;
-        clearGlobalHideTimer();
-        globalSheetHovered.value = false;
-        globalHoveredLink.value = null;
+        if (activeNavHoverMenuId.value !== menuId) return;
+        resetGlobalPreview();
     }
 
-    onBeforeUnmount(() => {
-        if (globalActiveMenuId.value === menuId) {
-            deactivateNavHoverMenu(menuId);
-        }
-    });
+    if (getCurrentInstance()) {
+        onBeforeUnmount(() => {
+            if (activeNavHoverMenuId.value === menuId) {
+                deactivateNavHoverMenu(menuId);
+            }
+        });
+    }
 
     return {
         activePreviewLink,

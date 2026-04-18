@@ -6,101 +6,133 @@
             class="md-dialog-card"
             :class="{ 'md-dialog-card--fullscreen': fullscreen }"
         >
-            <!-- Fullscreen toolbar -->
-            <v-toolbar v-if="fullscreen" class="md-toolbar">
-                <v-toolbar-title>{{ title || t.defaultTitle }}</v-toolbar-title>
-                <v-spacer></v-spacer>
-                <div class="page-indicator-toolbar">
-                    {{ t.pageIndicator.replace('{current}', (currentPage + 1).toString()).replace('{total}', pageCount.toString()) }}
-                </div>
-                <v-spacer></v-spacer>
-
-                <!-- Fullscreen Navigation -->
-                <div v-if="pageCount > 1" class="toolbar-navigation">
-                    <v-btn
-                        :disabled="currentPage === 0"
-                        @click="prevPage"
-                        icon
-                        size="small"
-                        class="toolbar-nav-btn"
-                    >
-                        <v-icon>mdi-chevron-left</v-icon>
-                    </v-btn>
-
-                    <span class="toolbar-page-dots">
-                        <template
-                            v-for="(item, index) in visiblePages"
-                            :key="index"
-                        >
-                            <v-btn
-                                v-if="item.type === 'page'"
-                                size="x-small"
-                                :variant="
-                                    item.page === currentPage + 1
-                                        ? 'flat'
-                                        : 'text'
-                                "
-                                :color="
-                                    item.page === currentPage + 1
-                                        ? 'white'
-                                        : 'grey-lighten-1'
-                                "
-                                @click="goToPage(item.page - 1)"
-                                class="toolbar-dot-btn"
-                            >
-                                {{ item.page }}
-                            </v-btn>
-                            <span
-                                v-else-if="item.type === 'ellipsis'"
-                                class="toolbar-ellipsis"
-                                >...</span
-                            >
-                        </template>
-                    </span>
-
-                    <v-btn
-                        :disabled="currentPage === pageCount - 1"
-                        @click="nextPage"
-                        icon
-                        size="small"
-                        class="toolbar-nav-btn"
-                    >
-                        <v-icon>mdi-chevron-right</v-icon>
-                    </v-btn>
-                </div>
-
-                <v-btn icon @click="close" class="md-close-btn">
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
-            </v-toolbar>
-
-            <!-- Regular title -->
-            <v-card-title v-else-if="title" class="md-card-title">{{
+            <v-card-title v-if="!fullscreen && title" class="md-card-title">{{
                 title || t.defaultTitle
             }}</v-card-title>
 
-            <!-- Content Area -->
             <v-card-text
                 class="md-card-content"
                 :class="contentWrapperClasses"
             >
-                <div
-                    v-if="!fullscreen && pageCount > 1"
-                    class="page-indicator"
-                >
-                    {{ t.pageIndicator.replace('{current}', (currentPage + 1).toString()).replace('{total}', pageCount.toString()) }}
-                </div>
+                <div v-if="fullscreen" class="md-fullscreen-surface">
+                    <div class="md-fullscreen-shell" :style="fullscreenShellStyle">
+                        <header class="md-fullscreen-header">
+                            <h1 class="md-fullscreen-title">
+                                {{ title || t.defaultTitle }}
+                            </h1>
 
-                <div class="vp-doc">
-                    <div
-                        v-for="pageIndex in pageCount"
-                        :key="pageIndex"
-                        class="page-content"
-                        v-show="currentPage === pageIndex - 1"
-                    >
-                        <slot :name="`page${pageIndex}`"></slot>
+                            <v-btn
+                                icon
+                                variant="text"
+                                :aria-label="t.closeButton"
+                                @click="close"
+                                class="md-close-btn md-close-btn--plain"
+                            >
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                        </header>
+
+                        <div
+                            v-if="pageCount > 1"
+                            class="md-fullscreen-meta"
+                        >
+                            <div class="md-fullscreen-page-indicator">
+                                {{
+                                    t.pageIndicator
+                                        .replace(
+                                            "{current}",
+                                            (currentPage + 1).toString(),
+                                        )
+                                        .replace(
+                                            "{total}",
+                                            pageCount.toString(),
+                                        )
+                                }}
+                            </div>
+
+                            <div class="md-fullscreen-navigation">
+                                <v-btn
+                                    :disabled="currentPage === 0"
+                                    @click="prevPage"
+                                    variant="text"
+                                    size="small"
+                                    prepend-icon="mdi-chevron-left"
+                                    class="md-fullscreen-nav-btn"
+                                >
+                                    {{ t.prevButton }}
+                                </v-btn>
+
+                                <span class="md-fullscreen-page-dots">
+                                    <template
+                                        v-for="(item, index) in visiblePages"
+                                        :key="index"
+                                    >
+                                        <v-btn
+                                            v-if="item.type === 'page'"
+                                            size="x-small"
+                                            :variant="
+                                                item.page === currentPage + 1
+                                                    ? 'flat'
+                                                    : 'text'
+                                            "
+                                            @click="goToPage(item.page - 1)"
+                                            class="md-fullscreen-dot-btn"
+                                        >
+                                            {{ item.page }}
+                                        </v-btn>
+                                        <span
+                                            v-else-if="item.type === 'ellipsis'"
+                                            class="md-fullscreen-ellipsis"
+                                            >...</span
+                                        >
+                                    </template>
+                                </span>
+
+                                <v-btn
+                                    :disabled="currentPage === pageCount - 1"
+                                    @click="nextPage"
+                                    variant="text"
+                                    size="small"
+                                    append-icon="mdi-chevron-right"
+                                    class="md-fullscreen-nav-btn"
+                                >
+                                    {{ t.nextButton }}
+                                </v-btn>
+                            </div>
+                        </div>
+
+                        <div class="vp-doc md-fullscreen-doc">
+                            <div
+                                v-for="pageIndex in pageCount"
+                                :key="pageIndex"
+                                class="page-content"
+                                v-show="currentPage === pageIndex - 1"
+                            >
+                                <slot :name="`page${pageIndex}`"></slot>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <template v-else>
+                    <div
+                        v-if="pageCount > 1"
+                        class="page-indicator"
+                    >
+                        {{ t.pageIndicator.replace('{current}', (currentPage + 1).toString()).replace('{total}', pageCount.toString()) }}
+                    </div>
+
+                    <div class="vp-doc">
+                        <div
+                            v-for="pageIndex in pageCount"
+                            :key="pageIndex"
+                            class="page-content"
+                            v-show="currentPage === pageIndex - 1"
+                        >
+                            <slot :name="`page${pageIndex}`"></slot>
+                        </div>
+                    </div>
+                </template>
             </v-card-text>
 
             <!-- Regular Navigation -->
@@ -168,8 +200,9 @@
 
 <script setup>
 // @i18n
-import { ref, computed } from "vue";
+import { ref, computed, getCurrentInstance } from "vue";
 import { useSafeI18n } from "@utils/i18n/locale";
+import { resolveDialogFullscreenShellMaxWidth } from "./dialogFullscreenWidth";
 
 const { t } = useSafeI18n("md-multipage-dialog", {
     defaultTitle: "Multi-Page Dialog",
@@ -202,6 +235,30 @@ const props = defineProps({
 
 const isOpen = ref(false);
 const currentPage = ref(0);
+const rawVNodeProps = getCurrentInstance()?.vnode.props ?? {};
+
+function hasExplicitDialogProp(name) {
+    const kebabName = name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+    return (
+        Object.prototype.hasOwnProperty.call(rawVNodeProps, name) ||
+        Object.prototype.hasOwnProperty.call(rawVNodeProps, kebabName)
+    );
+}
+
+const dialogContentClass = computed(() =>
+    props.fullscreen
+        ? "md-dialog-overlay md-dialog-overlay--fullscreen"
+        : "md-dialog-overlay",
+);
+
+const fullscreenShellStyle = computed(() => ({
+    "--md-fullscreen-shell-max-width": resolveDialogFullscreenShellMaxWidth({
+        width: props.width,
+        maxWidth: props.maxWidth,
+        hasExplicitWidth: hasExplicitDialogProp("width"),
+        hasExplicitMaxWidth: hasExplicitDialogProp("maxWidth"),
+    }),
+}));
 
 const dialogProps = computed(() => ({
     maxWidth: props.maxWidth,
@@ -218,6 +275,7 @@ const dialogProps = computed(() => ({
     scrim: props.scrim,
     zIndex: props.zIndex,
     fullscreen: props.fullscreen,
+    contentClass: dialogContentClass.value,
 }));
 
 const contentWrapperClasses = computed(() => ({
@@ -291,54 +349,127 @@ const visiblePages = computed(() => {
     }
     .md-dialog-card--fullscreen {
         border-radius: 0 !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        width: 100% !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        max-height: 100dvh !important;
+        max-width: 100vw !important;
         border: none !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
+        margin: 0 !important;
+        box-shadow: none !important;
     }
 
-    /* Toolbar */
-    .md-toolbar {
-        background: var(--vp-c-brand-1) !important;
-        color: white !important;
-    }
-    .md-close-btn,
-    .toolbar-nav-btn {
-        color: white !important;
-    }
-    .toolbar-nav-btn:disabled {
-        color: rgba(255, 255, 255, 0.4) !important;
+    :deep(.md-dialog-overlay--fullscreen) {
+        margin: 0 !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
     }
 
-    /* Toolbar Navigation */
-    .toolbar-navigation {
+    .md-fullscreen-surface {
+        width: 100%;
+        min-height: 100%;
+        display: flex;
+        justify-content: center;
+        padding:
+            max(28px, env(safe-area-inset-top))
+            max(24px, env(safe-area-inset-right))
+            max(40px, env(safe-area-inset-bottom))
+            max(24px, env(safe-area-inset-left));
+        box-sizing: border-box;
+    }
+
+    .md-fullscreen-shell {
+        width: 100%;
+        max-width: var(--md-fullscreen-shell-max-width, 860px);
+    }
+
+    .md-fullscreen-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 22px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--vp-c-divider);
+    }
+
+    .md-fullscreen-title {
+        margin: 0;
+        font-size: clamp(1.9rem, 2.8vw, 2.35rem);
+        line-height: 1.18;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+        color: var(--vp-c-text-1);
+    }
+
+    .md-close-btn--plain {
+        flex-shrink: 0;
+        margin: -8px -12px 0 0;
+        color: var(--vp-c-text-2) !important;
+    }
+
+    .md-close-btn--plain:hover {
+        color: var(--vp-c-text-1) !important;
+        background: var(--vp-c-default-soft) !important;
+    }
+
+    .md-fullscreen-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px 24px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid color-mix(in srgb, var(--vp-c-divider) 72%, transparent);
+    }
+
+    .md-fullscreen-page-indicator {
+        color: var(--vp-c-text-2);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .md-fullscreen-navigation {
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-right: 16px;
-    }
-    .toolbar-page-dots {
-        display: flex;
-        gap: 4px;
-        align-items: center;
-    }
-    .toolbar-dot-btn {
-        min-width: 32px !important;
-        height: 32px !important;
-        font-weight: 600 !important;
-    }
-    .toolbar-ellipsis {
-        color: rgba(255, 255, 255, 0.7) !important;
-        user-select: none !important;
-    }
-    .page-indicator-toolbar {
-        color: rgba(255, 255, 255, 0.9) !important;
-        font-size: 0.875rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
     }
 
-    /* Card Title & Content */
+    .md-fullscreen-nav-btn {
+        color: var(--vp-c-text-2) !important;
+    }
+
+    .md-fullscreen-page-dots {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .md-fullscreen-dot-btn {
+        min-width: 30px !important;
+        height: 30px !important;
+        color: var(--vp-c-text-2) !important;
+    }
+
+    .md-fullscreen-dot-btn.v-btn--variant-flat {
+        background: var(--vp-c-default-soft) !important;
+        color: var(--vp-c-text-1) !important;
+    }
+
+    .md-fullscreen-ellipsis {
+        color: var(--vp-c-text-3);
+        user-select: none;
+    }
+
     .md-card-title {
         background: var(--vp-c-bg-alt) !important;
         color: var(--vp-c-text-1) !important;
@@ -354,6 +485,15 @@ const visiblePages = computed(() => {
         flex: 1;
         overflow-y: auto;
     }
+
+    .md-content--fullscreen {
+        min-height: 100% !important;
+        max-height: 100dvh !important;
+        padding: 0 !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
+    }
+
     .md-content--scrollable {
         max-height: 60vh !important;
     }
@@ -482,5 +622,63 @@ const visiblePages = computed(() => {
     .vp-doc :deep(td) {
         border: 1px solid var(--vp-c-divider);
         padding: 8px 16px;
+    }
+
+    @media (max-width: 768px) {
+        .md-fullscreen-surface {
+            padding:
+                max(20px, env(safe-area-inset-top))
+                max(16px, env(safe-area-inset-right))
+                max(28px, env(safe-area-inset-bottom))
+                max(16px, env(safe-area-inset-left));
+        }
+
+        .md-fullscreen-header {
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+        }
+
+        .md-fullscreen-title {
+            font-size: clamp(1.55rem, 7vw, 2rem);
+        }
+
+        .md-fullscreen-meta {
+            align-items: flex-start;
+        }
+
+        .md-fullscreen-navigation {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .md-fullscreen-surface {
+            padding:
+                max(16px, env(safe-area-inset-top))
+                max(12px, env(safe-area-inset-right))
+                max(24px, env(safe-area-inset-bottom))
+                max(12px, env(safe-area-inset-left));
+        }
+
+        .md-fullscreen-header {
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+        }
+
+        .md-fullscreen-meta {
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+        }
+
+        .md-fullscreen-navigation {
+            gap: 6px;
+        }
+
+        .md-fullscreen-page-dots {
+            flex-wrap: wrap;
+        }
     }
 </style>
